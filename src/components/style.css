@@ -1,0 +1,318 @@
+
+
+
+
+
+
+.tile {
+    min-height: 25px !important;
+    min-width: 25px !important;
+    border-style: none;
+    border-width: 0.01px;
+    text-overflow: ellipsis;
+    font-size: 8px;
+    padding: 5px !important;   
+    user-select: none;
+    /*margin: 10px;*/
+    border-radius: 50%;
+    position:absolute;
+    z-index: 1;
+    justify-content: center;
+    align-items: center;
+    text-justify: center;
+    align-content: center;
+    text-align: center;
+}
+
+.tilewrapper{
+    min-height: 25px !important;
+    min-width: 25px !important;
+    border-style: none;
+    border-width: 0.01px;
+    text-overflow: ellipsis;
+    font-size: 8px;
+    user-select: none;
+    margin: 10px;
+    position:relative;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+
+[class^="route_right _"][class$=" routepath"], [class^="route_bottom _"][class$=" routepath"]{
+    background-color: rgb(170, 191,189);
+}
+
+.route_right, .route_bottom{
+    content: "";
+    position: absolute;
+    z-index: 0;
+    width: 25px;
+    height: 2px;
+    background-color: rgb(191,161,143);
+
+}
+.route_right{
+    animation-name: anim_route_right_1;
+    animation-duration: .5s;
+    left:80%; 
+
+}
+.route_right._2{
+    animation-name: anim_route_right_2;
+    animation-duration: .5s;
+    height: 6px;
+    width: 26px;
+}
+.route_right._3{
+    animation-name: anim_route_right_3;
+    animation-duration: .5s;
+    height: 10px;
+    width: 27px
+}
+.route_right._4{
+    animation-name: anim_route_right_4;
+    animation-duration: .5s;
+    height:14px;
+    width: 27px;
+}
+.route_right._5{
+    animation-name: anim_route_right_5;
+    animation-duration: .5s;
+    height: 18px;
+    width: 30px;
+}
+
+
+.route_bottom{
+    transform: rotateZ(90deg);
+    bottom:-55%;
+    animation-name: anim_route_right_1;
+    animation-duration: .5s;
+    
+}
+.route_bottom._2{
+    animation-name: anim_route_right_2;
+    animation-duration: .5s;
+    height: 6px;
+    width: 26px;
+}
+.route_bottom._3{
+    animation-name: anim_route_right_3;
+    animation-duration: .5s;
+    height: 10px;
+    width: 27px
+}
+.route_bottom._4{
+    animation-name: anim_route_right_4;
+    animation-duration: .5s;
+    height:14px;
+    width: 32px;
+}
+.route_bottom._5{
+    animation-name: anim_route_right_5;
+    animation-duration: .5s;
+    height: 18px;
+    width: 40px;
+}
+
+@keyframes anim_route_right_1 {
+    0% {scale: 200%}
+    100% {scale: 100%}
+}
+@keyframes anim_route_right_2 {
+    0% {scale: 200%}
+    100% {scale: 100%}
+}
+@keyframes anim_route_right_3 {
+    0% {scale: 150%}
+    100% {scale: 100%}
+}
+@keyframes anim_route_right_4 {
+    0% {scale: 150%}
+    100% {scale: 100%}
+}
+@keyframes anim_route_right_5 {
+    0% {scale: 120%}
+    100% {scale: 100%}
+}
+
+@keyframes anim_visited{
+    0% {scale: 140%}
+    100% {scale: 100%}
+}
+
+@keyframes anim_routenode {
+    0% {scale: 140%}
+    100% {scale: 100%}
+}
+
+@keyframes anim_wall {
+    0% {scale: 140%}
+    100% {scale: 100%}
+}
+@keyframes anim_normal {
+    0% {scale: 140%}
+    100% {scale: 100%}
+}
+
+@keyframes anim_start {
+    0% {scale: 160%}
+    100% {scale: 100%}
+}
+
+@keyframes anim_finish{
+    0% {scale: 160%}
+    100% {scale: 100%}
+}
+
+.tile.normal{
+    animation-name: anim_normal;
+    animation-duration: .5s;
+    /*background-color: #9e9e9e;*/
+    /*background-color: rgb(166,113,83);*/
+    background-color: rgb(191,161,143);
+    border:none;
+    border-width: 1.5px;
+    border-color: rgb(112, 77, 56);
+    
+}
+.tile.wall{
+    background-color: black;
+    animation-name: anim_wall;
+    animation-duration: .5s;
+    border-color: white !important;
+    border: none;
+}
+
+.tile.start{
+    background-color: rgb(158, 191, 86) !important;
+    border: none !important;
+    animation-name: anim_start;
+    animation-duration: .5s;
+}
+
+.tile.finish{
+    background-color: rgb(180,38,44) !important;
+    border:none !important;
+    animation-name: anim_finish;
+    animation-duration: .5s;
+}
+
+.tile.visited{
+    background-color: rgb(104, 49, 29);
+    animation-name: anim_visited;
+    animation-duration: 0.5s;
+    border: none;
+    border-width: 1.5px;
+}
+
+.tile.routenode {
+    background-color: rgb(170, 191,189);
+    animation-name: anim_routenode;
+    animation-duration: 1s;
+    border:none
+}
+
+.tile.testcolor {
+    background-color: cyan;
+}
+
+.gridrow{
+    display:flex;
+    padding: 0px;
+    margin: 0px;
+    margin:auto;
+    justify-content: center;
+}
+
+.slidercomponent{
+    text-align: center;
+    width: 200px;
+
+}
+#slider{
+    width: 200px;
+}
+
+.buttonrow{
+    display: flex;
+    height: 50px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+
+button {
+    user-select: none;
+
+}
+
+.menubuttons{
+    color: black;
+    border:none;
+    background-color: transparent;
+    margin: 0px 0px;
+    font-weight: 600;
+    border-right: solid;
+    border-left: solid;
+    border-color: rgb(207, 202, 202);
+    
+    border-width: 0.1px;
+}
+
+.menubuttons:hover{
+    background-color: rgb(207, 202, 202);
+}
+
+.menubuttons:not(:last-child) {
+    border-right: none !important
+  }
+
+#startnodebutton{
+
+
+} 
+
+#finishnodebutton{
+
+}
+#startsolvingbutton{
+    color: black;
+    border-color: rgb(104, 49, 29);
+    margin: 0px 5px;
+}
+
+#maingrid{
+    margin:auto;
+    text-align: center;
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+#mainbody{
+    margin-top: 80px;
+    align-content: center;
+}
+
+body {
+    content: "";
+    /*background-color: hsl(57, 9, 95) !important;*/
+    background-color: rgb(242,241,220) !important;
+    font-family: 'Montserrat' !important;
+}
+
+
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../fonts/Montserrat-VariableFont_wght.ttf') format('truetype'),
+
+    /* Add additional font formats if necessary */
+    /* Specify the correct path to the font files */
+  }
+
+
+  
