@@ -7,6 +7,7 @@ import SliderComponent from "./Slider.tsx";
 import MinHeap from "../data_struct/heap.ts";
 import Dijkstra from "../algorithms/dijkstra.ts";
 import ButtonRow from "./Buttonrow.tsx";
+import Maingrid from "./Maingrid.tsx";
 
 export interface NodeInterface {
   id: number;
@@ -220,6 +221,8 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
         this.state.nodes[i][j].type = PathPointType.Normal;
         this.state.nodes[i][j].rightRouteWeight = 1;
         this.state.nodes[i][j].bottomRouteWeight = 1;
+        this.state.nodes[i][j].isBottomRoutePath = false;
+        this.state.nodes[i][j].isRightRoutePath = false;
       }
     }
 
@@ -239,53 +242,11 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
         />
         <div>{this.state.currentAlgorithm}</div>
 
-        <div key={"maingrid"} id="maingrid" className="">
-          {this.state.nodes.map((nodeRow, rowIndex) => {
-            return (
-              <div key={rowIndex} className="gridrow">
-                {nodeRow.map((node) => {
-                  const {
-                    id,
-                    x,
-                    y,
-                    type,
-                    visited,
-                    depth,
-                    isTestOnProp,
-                    weight,
-                    isLastRow,
-                    isLastCol,
-                    rightRouteWeight,
-                    bottomRouteWeight,
-                    isRightRoutePath,
-                    isBottomRoutePath,
-                  } = node;
-                  return (
-                    <MemoizedNode
-                      key={id}
-                      id={id}
-                      x={x}
-                      y={y}
-                      nodeTypeProp={type}
-                      isVisitedProp={visited}
-                      depthProp={depth}
-                      isTestOnProp={isTestOnProp}
-                      weight={weight}
-                      clickOnNode={this.handleClickOnNode}
-                      clickOnRoute={this.handleClickOnRoute}
-                      isLastRow={isLastRow}
-                      isLastCol={isLastCol}
-                      rightRouteWeightProp={rightRouteWeight}
-                      bottomRouteWeightProp={bottomRouteWeight}
-                      isRightRoutePathProp={isRightRoutePath}
-                      isBottomRoutePathProp={isBottomRoutePath}
-                    />
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+        <Maingrid
+          nodes={this.state.nodes}
+          clickOnNode={this.handleClickOnNode}
+          clickOnRoute={this.handleClickOnRoute}
+        />
         <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
       </div>
     );
