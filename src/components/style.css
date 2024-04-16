@@ -228,17 +228,74 @@
 
 .slidercomponent{
     text-align: center;
-    width: 200px;
-
+   
 }
 #slider{
-    width: 200px;
+    
 }
+
+.sliderwrapper {
+    position: relative;
+    height: 20rem;
+    width: 3rem;
+  }
+  .sliderwrapper::before, .sliderwrapper::after {
+    display: block;
+    position: absolute;
+    z-index: 99;
+    color: #fff;
+    width: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 0.75rem 0;
+    pointer-events: none;
+  }
+  .sliderwrapper::before {
+    content: "+";
+  }
+  .sliderwrapper::after {
+    content: "−";
+    bottom: 0;
+  }
+
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: red;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    padding: 0;
+    width: 20rem;
+    height: 3.5rem;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    border-radius: 1rem;
+    overflow: hidden;
+    cursor: row-resize;
+  }
+  input[type=range][step] {
+    background-color: gray;
+    /*background-image: repeating-linear-gradient(to right, red, green, calc(12.5% - 1px), #05051a 12.5%);*/
+
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 0;
+    box-shadow: -20rem 0 0 20rem red;
+  }
+  input[type=range]::-moz-range-thumb {
+    border: none;
+    width: 0;
+    box-shadow: -20rem 0 0 20rem red;
+  }
 
 .buttonrow{
     display: flex;
     height: 50px;
     margin-bottom: 10px;
+    margin-top: 20px;
     justify-content: center;
 }
 
@@ -292,9 +349,44 @@ button {
     overflow: hidden;
 }
 
+#navbar{
+}
+
 #mainbody{
-    margin-top: 80px;
+    display: flex;
+    margin-top: 56px;
+    padding-top: 1px;
     align-content: center;
+}
+
+.info-container{
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    padding: 15px;
+    text-align: justify;
+}
+.info-container:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  }
+
+.main-col-1{
+    flex: 25%;
+    padding-left: 20px;
+    padding-top: 20px;
+}
+.main-col-2{
+    flex: 60%;
+}
+.main-col-3{
+    flex: 15%;
+}
+
+li+li {
+    margin-top: 10px;
 }
 
 body {
@@ -302,6 +394,7 @@ body {
     /*background-color: hsl(57, 9, 95) !important;*/
     background-color: rgb(242,241,220) !important;
     font-family: 'Montserrat' !important;
+    user-select: none;
 }
 
 

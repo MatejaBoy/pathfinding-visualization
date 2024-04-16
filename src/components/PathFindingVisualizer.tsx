@@ -1,10 +1,8 @@
 import { Component } from "react";
-import { MemoizedNode } from "./Node.tsx";
 import BreadthFirstSearch from "../algorithms/breadth-first.ts";
 import DepthFirstSearch from "../algorithms/depth-first.ts";
 import Navbar from "./Navbar.tsx";
 import SliderComponent from "./Slider.tsx";
-import MinHeap from "../data_struct/heap.ts";
 import Dijkstra from "../algorithms/dijkstra.ts";
 import ButtonRow from "./Buttonrow.tsx";
 import Maingrid from "./Maingrid.tsx";
@@ -55,7 +53,6 @@ export enum Algorithms {
 class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   gridsize: { x: number; y: number } = { x: 15, y: 10 };
   defaultSpeed: number = 70;
-  heap: MinHeap = new MinHeap();
   constructor(props: any) {
     super(props);
     this.state = {
@@ -231,24 +228,48 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   render() {
     return (
-      <div id="mainbody">
+      <>
         <Navbar setAlg={this.setAlgorithm} />
-        <ButtonRow
-          setStartNode={this.setStartNode}
-          setFinishNode={this.setFinishNode}
-          resetSearch={this.resetSearch}
-          startSolving={this.startSolving}
-          stopSolving={this.stopSolving}
-        />
-        <div>{this.state.currentAlgorithm}</div>
+        <div id="mainbody">
+          <div className="main-col-1">
+            <div className="info-container">
+              <h6 style={{ textAlign: "center" }}>Dijkstra Algorithm</h6>
+              <p>
+                This algorithm is used in weighted graphs to find the shortest route from to start node to the finish
+                node.
+              </p>
 
-        <Maingrid
-          nodes={this.state.nodes}
-          clickOnNode={this.handleClickOnNode}
-          clickOnRoute={this.handleClickOnRoute}
-        />
-        <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
-      </div>
+              <h6 style={{ textAlign: "center" }}>How to use:</h6>
+              <ul style={{ listStyleType: "auto", textAlign: "justify", paddingLeft: 15 }}>
+                <li>
+                  Press the "Set start node" and "Set finish node" buttons to choose a random start and finish nodes
+                </li>
+                <li>Press on a node in the grid to set it to a wall</li>
+                <li>Press on a route between two nodes once or multiple times to increase its weight </li>
+                <li>Press the "Start solving" button</li>
+                <li>Use the "Speed" slider to set the solving speed</li>
+              </ul>
+            </div>
+          </div>
+          <div className="main-col-2">
+            <ButtonRow
+              setStartNode={this.setStartNode}
+              setFinishNode={this.setFinishNode}
+              resetSearch={this.resetSearch}
+              startSolving={this.startSolving}
+              stopSolving={this.stopSolving}
+            />
+            <Maingrid
+              nodes={this.state.nodes}
+              clickOnNode={this.handleClickOnNode}
+              clickOnRoute={this.handleClickOnRoute}
+            />
+          </div>
+          <div className="main-col-3">
+            <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
+          </div>
+        </div>
+      </>
     );
   }
 }

@@ -19,16 +19,17 @@ export default function SliderComponent({ onchange, max, min, step, defaultval }
   return (
     <div className="slidercomponent">
       <div className="slidertitle">Speed: {value}</div>
-      <input
-        id="slider"
-        type="range"
-        className="form-range"
-        min={min}
-        max={max}
-        step={step}
-        defaultValue={defaultval}
-        onChange={handleChange}
-      />
+      <div className="sliderwrapper">
+        <input
+          id="slider"
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          defaultValue={defaultval}
+          onChange={handleChange}
+        />
+      </div>
     </div>
   );
 }

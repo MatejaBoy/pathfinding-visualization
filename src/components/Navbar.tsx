@@ -22,7 +22,7 @@ function Navbar(props: NavbarProps) {
   }
 
   return (
-    <nav className="navbar fixed-top navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+    <nav id="navbar" className="navbar fixed-top navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
       <div className="container-fluid">
         <a className="navbar-brand" href="#">
           Pathfinder
