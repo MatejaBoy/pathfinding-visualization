@@ -6,6 +6,7 @@ import SliderComponent from "./Slider.tsx";
 import Dijkstra from "../algorithms/dijkstra.ts";
 import ButtonRow from "./Buttonrow.tsx";
 import Maingrid from "./Maingrid.tsx";
+import Infocontainer from "./Infocontainer.tsx";
 
 export interface NodeInterface {
   id: number;
@@ -232,24 +233,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
         <Navbar setAlg={this.setAlgorithm} />
         <div id="mainbody">
           <div className="main-col-1">
-            <div className="info-container">
-              <h6 style={{ textAlign: "center" }}>Dijkstra Algorithm</h6>
-              <p>
-                This algorithm is used in weighted graphs to find the shortest route from to start node to the finish
-                node.
-              </p>
-
-              <h6 style={{ textAlign: "center" }}>How to use:</h6>
-              <ul style={{ listStyleType: "auto", textAlign: "justify", paddingLeft: 15 }}>
-                <li>
-                  Press the "Set start node" and "Set finish node" buttons to choose a random start and finish nodes
-                </li>
-                <li>Press on a node in the grid to set it to a wall</li>
-                <li>Press on a route between two nodes once or multiple times to increase its weight </li>
-                <li>Press the "Start solving" button</li>
-                <li>Use the "Speed" slider to set the solving speed</li>
-              </ul>
-            </div>
+            <Infocontainer algorithm={this.state.currentAlgorithm} />
           </div>
           <div className="main-col-2">
             <ButtonRow

@@ -18,7 +18,7 @@ export default function SliderComponent({ onchange, max, min, step, defaultval }
   };
   return (
     <div className="slidercomponent">
-      <div className="slidertitle">Speed: {value}</div>
+      <h6 className="slidertitle">Solving speed</h6>
       <div className="sliderwrapper">
         <input
           id="slider"

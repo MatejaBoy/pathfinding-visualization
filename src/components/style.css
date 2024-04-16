@@ -40,7 +40,8 @@
 }
 
 [class^="route_right _"][class$=" routepath"], [class^="route_bottom _"][class$=" routepath"]{
-    background-color: rgb(170, 191,189);
+    /*background-color: rgb(170, 191,189);*/
+    background-color: blueviolet;
 }
 
 .route_right, .route_bottom{
@@ -208,7 +209,8 @@
 }
 
 .tile.routenode {
-    background-color: rgb(170, 191,189);
+    /*background-color: rgb(170, 191,189);*/
+    background: blueviolet;
     animation-name: anim_routenode;
     animation-duration: 1s;
     border:none
@@ -228,16 +230,22 @@
 
 .slidercomponent{
     text-align: center;
-   
+   margin-top: 0px;
+   border:solid;
+   border-radius: 8px;
+   padding: 15px;
+   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+   border-width: 1px;
 }
-#slider{
-    
+.slidertitle{
+    margin-bottom: 20px;
+    font-weight: 600;
 }
 
 .sliderwrapper {
     position: relative;
     height: 20rem;
-    width: 3rem;
+
   }
   .sliderwrapper::before, .sliderwrapper::after {
     display: block;
@@ -262,7 +270,7 @@
 input[type=range] {
     -webkit-appearance: none;
     appearance: none;
-    background-color: red;
+    background-color: rgb(104, 49, 29);
     position: absolute;
     top: 50%;
     left: 50%;
@@ -276,19 +284,19 @@ input[type=range] {
     cursor: row-resize;
   }
   input[type=range][step] {
-    background-color: gray;
+    background-color: rgb(191,161,143);
     /*background-image: repeating-linear-gradient(to right, red, green, calc(12.5% - 1px), #05051a 12.5%);*/
 
   }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 0;
-    box-shadow: -20rem 0 0 20rem red;
+    box-shadow: -20rem 0 0 20rem rgb(104, 49, 29);
   }
   input[type=range]::-moz-range-thumb {
     border: none;
     width: 0;
-    box-shadow: -20rem 0 0 20rem red;
+    box-shadow: -20rem 0 0 20rem rgb(104, 49, 29);
   }
 
 .buttonrow{
@@ -383,6 +391,8 @@ button {
 }
 .main-col-3{
     flex: 15%;
+    padding-top: 20px;
+    padding-right: 20px;
 }
 
 li+li {
@@ -391,8 +401,7 @@ li+li {
 
 body {
     content: "";
-    /*background-color: hsl(57, 9, 95) !important;*/
-    background-color: rgb(242,241,220) !important;
+    background-color: white !important;
     font-family: 'Montserrat' !important;
     user-select: none;
 }
