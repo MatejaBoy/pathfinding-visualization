@@ -51,7 +51,7 @@ export default class Dijkstra {
   static async dijkstraBacktrack(nodes: NodeInterface[][], x: number, y: number, setstate: Function) {
     // Function is used to backtrack from the finish to
     // the start node using the nodes with the shortest dist
-
+    if (!this.solving) return;
     let currentNode = nodes[y][x];
 
     // Looping until we find the Start node
@@ -93,6 +93,7 @@ export default class Dijkstra {
   }
 
   static async dijkstraSearch(nodes: NodeInterface[][], startPoint: { x: number; y: number }, setstate: Function) {
+    if (!this.solving) return;
     // When we start the search the current node is the start node
     let currentNode = nodes[startPoint.y][startPoint.x];
 
