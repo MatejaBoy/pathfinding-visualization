@@ -12,7 +12,6 @@ export default function Maingrid(props: MaingridProps) {
   const [nodes, setNodes] = useState(props.nodes);
 
   useEffect(() => {
-    console.log("chage");
     setNodes(props.nodes);
   }, [props.nodes]);
 
@@ -42,6 +41,7 @@ export default function Maingrid(props: MaingridProps) {
                     bottomRouteWeightProp={node.bottomRouteWeight}
                     isRightRoutePathProp={node.isRightRoutePath}
                     isBottomRoutePathProp={node.isBottomRoutePath}
+                    toAnimateProp={node.toAnimate}
                   />
                 );
               })}

@@ -72,7 +72,7 @@ function Navbar(props: NavbarProps) {
                 </li>
                 <li>
                   <a id="wdbutton" onClick={clickOnAlgorithm} className="dropdown-item" href="#">
-                    Weighted Dijkstra
+                    Dijkstra search
                   </a>
                 </li>
                 <li>

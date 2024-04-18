@@ -323,19 +323,8 @@ input[type=range] {
 .menubuttons:hover{
     background-color: rgb(207, 202, 202);
 }
-/*
-.menubuttons:not(:last-child) {
-    border-right: none !important
-  }
-*/
-#startnodebutton{
 
 
-} 
-
-#finishnodebutton{
-
-}
 #startsolvingbutton{
     color: black;
     border-color: rgb(104, 49, 29);
@@ -352,8 +341,6 @@ input[type=range] {
     overflow: hidden;
 }
 
-#navbar{
-}
 
 #mainbody{
     display: flex;

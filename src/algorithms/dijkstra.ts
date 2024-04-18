@@ -1,6 +1,6 @@
 import { NodeInterface, PathPointType } from "../components/PathFindingVisualizer";
 import NodeMinHeap, { NodeMinHeapInterface } from "../data_struct/heap";
-import CommonFuncs from "./common-func";
+import CommonFuncs, { Point } from "./common-func";
 
 export default class Dijkstra {
   static visitedNodes: NodeMinHeapInterface[] = [];
@@ -16,32 +16,20 @@ export default class Dijkstra {
   }
 
   static setSolverSpeed(percent: number) {
-    console.log("Percent: " + percent);
     this.solverTimeout = CommonFuncs.mapFromRangeToRange(
       percent,
       { min: 10, max: 100 },
       { min: this.maxTimeout, max: this.minTimeout }
     );
-    console.log("Solver timeout: " + this.solverTimeout);
   }
 
-  static startDijkstraSearch(
-    nodes: NodeInterface[][],
-    startPoint: { x: number; y: number },
-    setstate: Function,
-    defaultSpeed: number
-  ) {
+  static startDijkstraSearch(nodes: NodeInterface[][], startPoint: Point, setstate: Function, defaultSpeed: number) {
     // Clear the previous solution
     this.visitedNodes = [];
     this.heap = new NodeMinHeap();
     if (this.solverTimeout === undefined) this.solverTimeout = defaultSpeed;
+    this.heap.insert({ x: startPoint.x, y: startPoint.y, dist: 0, prev: undefined });
     // Populate the heap with the nodes
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = 0; j < nodes[i].length; j++) {
-        let startNode = nodes[i][j].type === PathPointType.Start;
-        this.heap.insert({ x: j, y: i, dist: startNode ? 0 : Infinity, prev: undefined });
-      }
-    }
 
     // Start the search
     this.setSolving(true);
@@ -114,22 +102,25 @@ export default class Dijkstra {
         // If its a wall we simply skip it
         if (adj.type === PathPointType.Wall) continue;
 
-        // Finding the index of the adjacents node in the Heap
-        let adjHeapIndex = this.heap.findByCoords(adj.x, adj.y);
-        if (adjHeapIndex === -1) continue;
-
         let distanceBetweenNodes: number;
         if (adj.x === currentNode.x - 1) distanceBetweenNodes = adj.rightRouteWeight;
         else if (adj.x === currentNode.x + 1) distanceBetweenNodes = currentNode.rightRouteWeight;
         else if (adj.y === currentNode.y - 1) distanceBetweenNodes = adj.bottomRouteWeight;
         else distanceBetweenNodes = currentNode.bottomRouteWeight;
 
-        if (distanceBetweenNodes + this.heap.arr[0].dist < this.heap.arr[adjHeapIndex].dist) {
+        let newDist = distanceBetweenNodes + this.heap.arr[0].dist;
+        // Finding the index of the adjacents node in the Heap
+        let adjHeapIndex = this.heap.findByCoords(adj.x, adj.y);
+        if (adjHeapIndex === -1) {
+          if (!adj.visited)
+            this.heap.insert({ x: adj.x, y: adj.y, dist: newDist, prev: { x: currentNode.x, y: currentNode.y } });
+        } else if (distanceBetweenNodes + this.heap.arr[0].dist < this.heap.arr[adjHeapIndex].dist) {
           this.heap.arr[adjHeapIndex].prev = { x: currentNode.x, y: currentNode.y };
           this.heap.decreaseKey(adjHeapIndex, distanceBetweenNodes + this.heap.arr[0].dist);
         }
       }
 
+      console.log(this.heap.arr);
       // After we looped through all the adjacents, we remove the current node
       // from the Heap and add it to the list of the visited nodes
       let min = this.heap.extractMin();

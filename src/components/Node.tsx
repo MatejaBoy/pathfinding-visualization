@@ -20,6 +20,7 @@ interface NodeProps {
   bottomRouteWeightProp: number;
   isRightRoutePathProp: boolean;
   isBottomRoutePathProp: boolean;
+  toAnimateProp: boolean;
 }
 
 export default function Node(node: NodeProps) {
@@ -31,6 +32,7 @@ export default function Node(node: NodeProps) {
   const [bottomRouteWidth, setBottomRouteWidth] = useState(node.bottomRouteWeightProp);
   const [isRightRoutePath, setIsRightRoutePath] = useState(node.isRightRoutePathProp);
   const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
+  const [toAnimate, setToAnimate] = useState(node.toAnimateProp);
 
   function handleClick() {
     node.clickOnNode([node.id, node.x, node.y], false);
@@ -50,6 +52,10 @@ export default function Node(node: NodeProps) {
 
   // When the prop nodeTypeProp changes,
   // we set the state variable nodeType to the new nodeTypeProp value
+
+  useEffect(() => {
+    setToAnimate(node.toAnimateProp);
+  }, [node.toAnimateProp]);
 
   useEffect(() => {
     setNodeType(node.nodeTypeProp);
@@ -99,7 +105,7 @@ export default function Node(node: NodeProps) {
   }
 
   function getVisitedModifier() {
-    if (isVisited == true) return "visited";
+    if (toAnimate == true) return "visited";
     if (isTest == true) return "testcolor";
     else return "";
   }

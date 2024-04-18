@@ -1,32 +1,28 @@
 import { NodeInterface, PathPointType } from "../components/PathFindingVisualizer";
 import NodeMinHeap, { NodeMinHeapInterface } from "../data_struct/heap";
-import CommonFuncs from "./common-func";
+import CommonFuncs, { Point } from "./common-func";
 
 export default class Astar {
   static heap: NodeMinHeap;
   static isSolving = true;
   static visitedNodes: NodeMinHeapInterface[] = [];
   static solverTimeout: number;
+  static maxTimeout = 1000;
+  static minTimeout = 10;
 
   static startAstarSearch(
     nodes: NodeInterface[][],
-    startPoint: { x: number; y: number },
+    startPoint: Point,
     setstate: Function,
     defaultSpeed: number,
-    finishPoint: { x: number; y: number }
+    finishPoint: Point
   ) {
     console.log("Startin A* search");
     // Clear the previous solution
     this.visitedNodes = [];
     this.heap = new NodeMinHeap();
     if (this.solverTimeout === undefined) this.solverTimeout = defaultSpeed;
-    // Populate the heap with the nodes
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = 0; j < nodes[i].length; j++) {
-        let startNode = nodes[i][j].type === PathPointType.Start;
-        this.heap.insert({ x: j, y: i, dist: startNode ? 0 : Infinity, prev: undefined });
-      }
-    }
+    this.heap.insert({ x: startPoint.x, y: startPoint.y, dist: 0, prev: undefined });
 
     // Start the search
     this.setSolving(true);
@@ -37,33 +33,33 @@ export default class Astar {
     this.isSolving = val;
   }
 
+  static setSolverSpeed(percent: number) {
+    console.log("Percent: " + percent);
+    this.solverTimeout = CommonFuncs.mapFromRangeToRange(
+      percent,
+      { min: 10, max: 100 },
+      { min: this.maxTimeout, max: this.minTimeout }
+    );
+    console.log("Solver timeout: " + this.solverTimeout);
+  }
+
   // Manhattan distance
-  static calcHeuristics(curr: { x: number; y: number }, goal: { x: number; y: number }) {
+  static calcHeuristics(curr: Point, goal: Point) {
     return 1 * (Math.abs(curr.x - goal.x) + Math.abs(curr.y - goal.y));
   }
 
-  static async AstarSearch(
-    nodes: NodeInterface[][],
-    startPoint: { x: number; y: number },
-    setstate: Function,
-    finishPoint: { x: number; y: number }
-  ) {
+  static async AstarSearch(nodes: NodeInterface[][], startPoint: Point, setstate: Function, finishPoint: Point) {
     let currentNode = nodes[startPoint.y][startPoint.x];
     while (this.isSolving) {
       // Little delay for better visualization
-      await CommonFuncs.timeout(10);
+      await CommonFuncs.timeout(this.solverTimeout);
 
-      // For visualization
       currentNode.visited = true;
       setstate();
 
       const adjacents = this.findAdjacents(nodes, currentNode.x, currentNode.y);
-
       for (const adj of adjacents) {
         if (adj.type === PathPointType.Wall) continue;
-
-        const adjIndex = this.heap.findByCoords(adj.x, adj.y);
-        if (adjIndex === -1) continue;
 
         let distanceBetweenNodes: number;
         if (adj.x === currentNode.x - 1) distanceBetweenNodes = adj.rightRouteWeight;
@@ -71,17 +67,23 @@ export default class Astar {
         else if (adj.y === currentNode.y - 1) distanceBetweenNodes = adj.bottomRouteWeight;
         else distanceBetweenNodes = currentNode.bottomRouteWeight;
 
-        // Cost (f) = Distance from start to node(g) + Distance from node to goal(h)
+        //* Cost (f) = Distance from start to node(g) + Distance from node to goal(h)
         let g = this.heap.arr[0].dist + distanceBetweenNodes;
         let h = this.calcHeuristics({ x: adj.x, y: adj.y }, { x: finishPoint.x, y: finishPoint.y });
         let adjCost = g + h;
 
-        if (adjCost < this.heap.arr[adjIndex].dist) {
-          this.heap.arr[adjIndex].prev = { x: currentNode.x, y: currentNode.y };
-          adj.depth = adjCost;
-          this.heap.decreaseKey(adjIndex, adjCost);
+        const adjIndex = this.heap.findByCoords(adj.x, adj.y);
+        if (adjIndex === -1) {
+          if (!adj.visited)
+            this.heap.insert({ x: adj.x, y: adj.y, dist: adjCost, prev: { x: currentNode.x, y: currentNode.y } });
+        } else {
+          if (adjCost < this.heap.arr[adjIndex].dist) {
+            this.heap.arr[adjIndex].prev = { x: currentNode.x, y: currentNode.y };
+            this.heap.decreaseKey(adjIndex, adjCost);
+          }
         }
       }
+
       let min = this.heap.extractMin();
       this.visitedNodes.push(min!);
 
@@ -93,7 +95,11 @@ export default class Astar {
         return;
       }
 
-      //If not
+      if (this.heap.arr.length < 1) {
+        console.warn("Finish Node cannot be reached!");
+        this.setSolving(false);
+        return;
+      }
 
       let current = this.heap.getMin();
       currentNode = nodes[current.y][current.x];
@@ -107,7 +113,7 @@ export default class Astar {
     let currentNode = nodes[y][x];
 
     // Looping until we find the Start node
-    while (currentNode.type !== PathPointType.Start) {
+    while (currentNode.type !== PathPointType.Start && this.isSolving) {
       // Delay for visualization
       await CommonFuncs.timeout(100);
 
@@ -121,19 +127,10 @@ export default class Astar {
           let prev_x = element.prev!.x;
           let prev_y = element.prev!.y;
 
-          if (prev_x === currentNode.x - 1) {
-            // Left adj
-            nodes[prev_y][prev_x].isRightRoutePath = true;
-          } else if (prev_x === currentNode.x + 1) {
-            // Right adj
-            currentNode.isRightRoutePath = true;
-          } else if (prev_y === currentNode.y - 1) {
-            // Top adj
-            nodes[prev_y][prev_x].isBottomRoutePath = true;
-          } else {
-            // Bottom adj
-            currentNode.isBottomRoutePath = true;
-          }
+          if (prev_x === currentNode.x - 1) nodes[prev_y][prev_x].isRightRoutePath = true;
+          else if (prev_x === currentNode.x + 1) currentNode.isRightRoutePath = true;
+          else if (prev_y === currentNode.y - 1) nodes[prev_y][prev_x].isBottomRoutePath = true;
+          else currentNode.isBottomRoutePath = true;
 
           if (nodes[element.y][element.x].type !== PathPointType.Finish)
             nodes[element.y][element.x].type = PathPointType.RouteNode;

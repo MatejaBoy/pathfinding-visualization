@@ -2,7 +2,7 @@ import { NodeInterface, PathPointType } from "../components/PathFindingVisualize
 import CommonFuncs from "./common-func";
 
 let queue: NodeInterface[] = [];
-let shortestRoute: NodeInterface[] = [];
+let routeNodes: NodeInterface[] = [];
 let visitedNodes: NodeInterface[] = [];
 
 let maxTimeout = 1000;
@@ -25,7 +25,7 @@ export default class BreadthFirstSearch {
     if (solverTimeout === undefined) this.setSolverSpeed(defaultSpeed);
 
     queue = [];
-    shortestRoute = [];
+    routeNodes = [];
     visitedNodes = [];
     this.isSolving = true;
     this.breadthFirstSearch(nodes, startPoint, setstate);
@@ -45,6 +45,23 @@ export default class BreadthFirstSearch {
     console.log("Solver timeout: " + solverTimeout);
   }
 
+  static async visualizeBFS(setstate: Function) {
+    // Visualize visited nodes
+    for (const node of visitedNodes) {
+      await CommonFuncs.timeout(25);
+      node.toAnimate = true;
+      setstate();
+    }
+
+    routeNodes.reverse();
+    // Visualize route nodes
+    for (const node of routeNodes) {
+      await CommonFuncs.timeout(25);
+      node.type = PathPointType.RouteNode;
+      setstate();
+    }
+  }
+
   // Function for creating a little delay for visualization purposes
   static timeout(delay: number) {
     return new Promise((res) => setTimeout(res, delay));
@@ -57,16 +74,17 @@ export default class BreadthFirstSearch {
     console.log("find shortest runs");
     // Exit clause to exit the recursion if we get back to the Start node
     if (checkNode.type === PathPointType.Start) {
+      console.warn("BFS has finished, starting visualization");
       stopTime = new Date().getTime();
       stopTimePerf = performance.now();
       console.log(stopTime);
       console.log("Time it took to run the find the route: " + (stopTime - startTime));
       console.log("Time it took to run the find the route with perf: " + (stopTimePerf - startTimePerf));
-
+      this.visualizeBFS(setstate);
       return;
     }
 
-    await BreadthFirstSearch.timeout(50);
+    //await BreadthFirstSearch.timeout(50);
     // Finding the adjacents of the current node that we are checking
     // We only search through the visited nodes to make it faster
     let adjacents = BreadthFirstSearch.findAdjacentsBacktrack(visitedNodes, checkNode);
@@ -80,16 +98,17 @@ export default class BreadthFirstSearch {
         currentBestNode = adjacents[i];
       }
     }
-    shortestRoute.push(currentBestNode);
 
     // If the node we're currently checking isn't the Finish node,
     //we set it's type to RouteNode, so it will have a different color.
     const checkNodeFromNodes = nodes[checkNode.y][checkNode.x];
-    if (checkNodeFromNodes.type != PathPointType.Finish) checkNodeFromNodes.type = PathPointType.RouteNode;
+    //if (checkNodeFromNodes.type != PathPointType.Finish) checkNodeFromNodes.type = PathPointType.RouteNode;
+    //if (checkNodeFromNodes.type != PathPointType.Start)
+    if (currentBestNode.type != PathPointType.Start) routeNodes.push(currentBestNode);
 
     // Lastly we update the screen for visualization,
     // then we start the recursion the the current node
-    setstate();
+    //setstate();
     BreadthFirstSearch.findShortestRoute(currentBestNode, nodes, setstate);
   }
 
@@ -141,10 +160,10 @@ export default class BreadthFirstSearch {
     }
 
     // We add little delay in the code for better visualization
-    await BreadthFirstSearch.timeout(solverTimeout);
+    // await BreadthFirstSearch.timeout(solverTimeout);
 
     // Updating the currant state
-    setstate();
+    //setstate();
 
     // Removing the current element from the queue, since it's already checked
     queue.shift();

@@ -26,6 +26,7 @@ export interface NodeInterface {
   bottomRouteWeight: number;
   isRightRoutePath: boolean;
   isBottomRoutePath: boolean;
+  toAnimate: boolean;
 }
 
 interface PathFindingVisualizerState {
@@ -56,7 +57,7 @@ export enum Algorithms {
 }
 
 class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
-  gridsize: { x: number; y: number } = { x: 16, y: 20 };
+  gridsize: { x: number; y: number } = { x: 16, y: 10 };
   defaultSpeed: number = 90;
   constructor(props: any) {
     super(props);
@@ -68,7 +69,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       isSHeld: false,
       isFHeld: false,
       solvespeed: 1,
-      currentAlgorithm: Algorithms.AS,
+      currentAlgorithm: Algorithms.BFS,
     };
   }
 
@@ -76,6 +77,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     DepthFirstSearch.setSolverSpeed(speed);
     BreadthFirstSearch.setSolverSpeed(speed);
     Dijkstra.setSolverSpeed(speed);
+    Astar.setSolverSpeed(speed);
   };
 
   getRandomInt(max: number): number {
@@ -210,6 +212,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           bottomRouteWeight: 1,
           isRightRoutePath: false,
           isBottomRoutePath: false,
+          toAnimate: false,
         };
         node_rows.push(currentNode);
         current_id++;

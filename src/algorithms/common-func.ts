@@ -1,4 +1,7 @@
-import { NodeInterface, PathPointType } from "../components/PathFindingVisualizer";
+export interface Point {
+  x: number;
+  y: number;
+}
 
 export default class CommonFuncs {
   static timeout(delay: number) {
