@@ -22,47 +22,29 @@ interface NodeProps {
   isBottomRoutePathProp: boolean;
 }
 
-export default function Node({
-  id,
-  x,
-  y,
-  nodeTypeProp,
-  isVisitedProp,
-  //depthProp,
-  isTestOnProp,
-  //weight,
-  clickOnNode,
-  clickOnRoute,
-  isLastRow,
-  isLastCol,
-  rightRouteWeightProp,
-  bottomRouteWeightProp,
-  isRightRoutePathProp,
-  isBottomRoutePathProp,
-}: NodeProps) {
-  const [nodeType, setNodeType] = useState(nodeTypeProp);
-  const [isVisited, setIsVisited] = useState(isVisitedProp);
-  //const [depth, setDepth] = useState(depthProp);
-  const [isTest, setIsTest] = useState(isTestOnProp);
-  const [rightRouteWidth, setRigthRouteWidth] = useState(rightRouteWeightProp);
-  const [bottomRouteWidth, setBottomRouteWidth] = useState(bottomRouteWeightProp);
-
-  const [isRightRoutePath, setIsRightRoutePath] = useState(isRightRoutePathProp);
-  const [isBottomRoutePath, setIsBottomRoutePath] = useState(isBottomRoutePathProp);
+export default function Node(node: NodeProps) {
+  const [nodeType, setNodeType] = useState(node.nodeTypeProp);
+  const [isVisited, setIsVisited] = useState(node.isVisitedProp);
+  const [depth, setDepth] = useState(node.depthProp);
+  const [isTest, setIsTest] = useState(node.isTestOnProp);
+  const [rightRouteWidth, setRigthRouteWidth] = useState(node.rightRouteWeightProp);
+  const [bottomRouteWidth, setBottomRouteWidth] = useState(node.bottomRouteWeightProp);
+  const [isRightRoutePath, setIsRightRoutePath] = useState(node.isRightRoutePathProp);
+  const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
 
   function handleClick() {
-    clickOnNode([id, x, y], false);
+    node.clickOnNode([node.id, node.x, node.y], false);
   }
 
   function handleClickOnRoute(dir: string) {
-    clickOnRoute([id, x, y], dir);
+    node.clickOnRoute([node.id, node.x, node.y], dir);
   }
 
-  // Handeling dragging the mouse over a Node
+  // Handling dragging the mouse over a Node
   // -- calling clickOnNode with drag=true --
   function onMouseMouseOver(e: React.MouseEvent) {
     if (e.buttons) {
-      clickOnNode([id, x, y], true);
+      node.clickOnNode([node.id, node.x, node.y], true);
     }
   }
 
@@ -70,36 +52,36 @@ export default function Node({
   // we set the state variable nodeType to the new nodeTypeProp value
 
   useEffect(() => {
-    setNodeType(nodeTypeProp);
-  }, [nodeTypeProp]);
+    setNodeType(node.nodeTypeProp);
+  }, [node.nodeTypeProp]);
 
   useEffect(() => {
-    setIsVisited(isVisitedProp);
-  }, [isVisitedProp]);
-
-  /*useEffect(() => {
-    setDepth(depthProp);
-  }, [depthProp]);*/
+    setIsVisited(node.isVisitedProp);
+  }, [node.isVisitedProp]);
 
   useEffect(() => {
-    setIsTest(isTestOnProp);
-  }, [isTestOnProp]);
+    setDepth(node.depthProp);
+  }, [node.depthProp]);
 
   useEffect(() => {
-    setRigthRouteWidth(rightRouteWeightProp);
-  }, [rightRouteWeightProp]);
+    setIsTest(node.isTestOnProp);
+  }, [node.isTestOnProp]);
 
   useEffect(() => {
-    setBottomRouteWidth(bottomRouteWeightProp);
-  }, [bottomRouteWeightProp]);
+    setRigthRouteWidth(node.rightRouteWeightProp);
+  }, [node.rightRouteWeightProp]);
 
   useEffect(() => {
-    setIsRightRoutePath(isRightRoutePathProp);
-  }, [isRightRoutePathProp]);
+    setBottomRouteWidth(node.bottomRouteWeightProp);
+  }, [node.bottomRouteWeightProp]);
 
   useEffect(() => {
-    setIsBottomRoutePath(isBottomRoutePathProp);
-  }, [isBottomRoutePathProp]);
+    setIsRightRoutePath(node.isRightRoutePathProp);
+  }, [node.isRightRoutePathProp]);
+
+  useEffect(() => {
+    setIsBottomRoutePath(node.isBottomRoutePathProp);
+  }, [node.isBottomRoutePathProp]);
 
   function getClassModifier() {
     switch (nodeType) {
@@ -135,20 +117,22 @@ export default function Node({
   }
 
   let styleRight = {
-    display: isLastCol ? "none" : "block",
+    display: node.isLastCol ? "none" : "block",
   };
   let styleBottom = {
-    display: isLastRow ? "none" : "block",
+    display: node.isLastRow ? "none" : "block",
   };
 
   let returnDiv = (
     <div className="tilewrapper">
       <div
         className={"tile" + " " + getClassModifier() + " " + getVisitedModifier()}
-        key={id}
+        key={node.id}
         onMouseOver={onMouseMouseOver}
         onMouseDown={handleClick}
-      ></div>
+      >
+        {depth}
+      </div>
       <div
         style={styleRight}
         onClick={() => handleClickOnRoute("right")}
@@ -166,21 +150,3 @@ export default function Node({
 }
 
 export const MemoizedNode = React.memo(Node);
-
-/*export default class Node extends Component<NodeProps, {}> {
-  constructor(props: NodeProps) {
-    super(props);
-    this.state = {};
-  }
-
-  render() {
-    return (
-      <>
-        <div className="tile" key={this.props.id}>
-          [ {this.props.x} , {this.props.y}]
-        </div>
-      </>
-    );
-  }
-}
-*/

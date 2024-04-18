@@ -1,4 +1,4 @@
-/*import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { NodeInterface } from "./PathFindingVisualizer";
 import { MemoizedNode } from "./Node";
 
@@ -26,9 +26,22 @@ export default function Maingrid(props: MaingridProps) {
                 return (
                   <MemoizedNode
                     key={node.id}
-                    node={node}
+                    id={node.id}
+                    x={node.x}
+                    y={node.y}
+                    nodeTypeProp={node.type}
+                    isVisitedProp={node.visited}
+                    depthProp={node.depth}
+                    isTestOnProp={node.isTestOnProp}
+                    weight={node.weight}
                     clickOnNode={props.clickOnNode}
                     clickOnRoute={props.clickOnRoute}
+                    isLastRow={node.isLastRow}
+                    isLastCol={node.isLastCol}
+                    rightRouteWeightProp={node.rightRouteWeight}
+                    bottomRouteWeightProp={node.bottomRouteWeight}
+                    isRightRoutePathProp={node.isRightRoutePath}
+                    isBottomRoutePathProp={node.isBottomRoutePath}
                   />
                 );
               })}
@@ -39,4 +52,3 @@ export default function Maingrid(props: MaingridProps) {
     </>
   );
 }
-*/

@@ -1,12 +1,14 @@
 import { Component } from "react";
-import { MemoizedNode } from "./Node.tsx";
 import BreadthFirstSearch from "../algorithms/breadth-first.ts";
 import DepthFirstSearch from "../algorithms/depth-first.ts";
 import Navbar from "./Navbar.tsx";
 import SliderComponent from "./Slider.tsx";
-import MinHeap from "../data_struct/heap.ts";
 import Dijkstra from "../algorithms/dijkstra.ts";
 import ButtonRow from "./Buttonrow.tsx";
+import Maingrid from "./Maingrid.tsx";
+import Infocontainer from "./Infocontainer.tsx";
+import CommonFuncs from "../algorithms/common-func.ts";
+import Astar from "../algorithms/Astar.ts";
 
 export interface NodeInterface {
   id: number;
@@ -48,13 +50,14 @@ export enum PathPointType {
 export enum Algorithms {
   BFS,
   DFS,
+  IDDFS,
   WD,
+  AS,
 }
 
 class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
-  gridsize: { x: number; y: number } = { x: 15, y: 10 };
-  defaultSpeed: number = 70;
-  heap: MinHeap = new MinHeap();
+  gridsize: { x: number; y: number } = { x: 16, y: 20 };
+  defaultSpeed: number = 90;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -65,7 +68,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       isSHeld: false,
       isFHeld: false,
       solvespeed: 1,
-      currentAlgorithm: Algorithms.BFS,
+      currentAlgorithm: Algorithms.AS,
     };
   }
 
@@ -125,13 +128,21 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
     const searchArgs: searchParams = [this.state.nodes, this.state.startNode!, this.customSetState, this.defaultSpeed];
     if (this.state.currentAlgorithm === Algorithms.BFS) BreadthFirstSearch.startBreadthFirstSearch(...searchArgs);
-    else if (this.state.currentAlgorithm === Algorithms.DFS) DepthFirstSearch.startDepthFirstSearch(...searchArgs);
+    else if (this.state.currentAlgorithm === Algorithms.DFS)
+      DepthFirstSearch.startDepthFirstSearch(...searchArgs, false);
+    else if (this.state.currentAlgorithm === Algorithms.IDDFS)
+      DepthFirstSearch.startDepthFirstSearch(...searchArgs, true);
     else if (this.state.currentAlgorithm === Algorithms.WD) Dijkstra.startDijkstraSearch(...searchArgs);
+    else if (this.state.currentAlgorithm === Algorithms.AS)
+      Astar.startAstarSearch(...searchArgs, this.state.finishNode);
   };
 
   stopSolving = () => {
     this.setState({ isSolving: false });
     Dijkstra.setSolving(false);
+    DepthFirstSearch.stopSolving();
+    BreadthFirstSearch.stopSolving();
+    Astar.setSolving(false);
   };
 
   setAlgorithm = (alg: Algorithms) => {
@@ -158,7 +169,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   handleClickOnRoute = (nodeInfo: [number, number, number], dir: string) => {
     console.log("Click on route");
     if (this.state.isSolving) return;
-    if (this.state.currentAlgorithm !== Algorithms.WD) return;
+    if (this.state.currentAlgorithm !== Algorithms.WD && this.state.currentAlgorithm !== Algorithms.AS) return;
     const currentNode = this.state.nodes[nodeInfo[2]][nodeInfo[1]];
 
     if (dir === "right") {
@@ -174,6 +185,10 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   };
 
   componentDidMount(): void {
+    this.createGrid();
+  }
+
+  createGrid() {
     let node_list = [];
     let node_rows = [];
     let current_id = 0;
@@ -210,16 +225,21 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     this.setState({});
   };
 
-  resetSearch = () => {
+  resetSearch = async () => {
+    this.stopSolving();
+    await CommonFuncs.timeout(100);
     for (let i = 0; i < this.state.nodes.length; i++) {
       for (let j = 0; j < this.state.nodes[i].length; j++) {
-        this.state.nodes[i][j].isAddedToQue = false;
-        this.state.nodes[i][j].isTestOnProp = false;
-        this.state.nodes[i][j].visited = false;
-        this.state.nodes[i][j].depth = 0;
-        this.state.nodes[i][j].type = PathPointType.Normal;
-        this.state.nodes[i][j].rightRouteWeight = 1;
-        this.state.nodes[i][j].bottomRouteWeight = 1;
+        const n = this.state.nodes[i][j];
+        n.isAddedToQue = false;
+        n.isTestOnProp = false;
+        n.visited = false;
+        n.depth = 0;
+        n.type = PathPointType.Normal;
+        n.rightRouteWeight = 1;
+        n.bottomRouteWeight = 1;
+        n.isBottomRoutePath = false;
+        n.isRightRoutePath = false;
       }
     }
 
@@ -228,66 +248,31 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   render() {
     return (
-      <div id="mainbody">
+      <>
         <Navbar setAlg={this.setAlgorithm} />
-        <ButtonRow
-          setStartNode={this.setStartNode}
-          setFinishNode={this.setFinishNode}
-          resetSearch={this.resetSearch}
-          startSolving={this.startSolving}
-          stopSolving={this.stopSolving}
-        />
-        <div>{this.state.currentAlgorithm}</div>
-
-        <div key={"maingrid"} id="maingrid" className="">
-          {this.state.nodes.map((nodeRow, rowIndex) => {
-            return (
-              <div key={rowIndex} className="gridrow">
-                {nodeRow.map((node) => {
-                  const {
-                    id,
-                    x,
-                    y,
-                    type,
-                    visited,
-                    depth,
-                    isTestOnProp,
-                    weight,
-                    isLastRow,
-                    isLastCol,
-                    rightRouteWeight,
-                    bottomRouteWeight,
-                    isRightRoutePath,
-                    isBottomRoutePath,
-                  } = node;
-                  return (
-                    <MemoizedNode
-                      key={id}
-                      id={id}
-                      x={x}
-                      y={y}
-                      nodeTypeProp={type}
-                      isVisitedProp={visited}
-                      depthProp={depth}
-                      isTestOnProp={isTestOnProp}
-                      weight={weight}
-                      clickOnNode={this.handleClickOnNode}
-                      clickOnRoute={this.handleClickOnRoute}
-                      isLastRow={isLastRow}
-                      isLastCol={isLastCol}
-                      rightRouteWeightProp={rightRouteWeight}
-                      bottomRouteWeightProp={bottomRouteWeight}
-                      isRightRoutePathProp={isRightRoutePath}
-                      isBottomRoutePathProp={isBottomRoutePath}
-                    />
-                  );
-                })}
-              </div>
-            );
-          })}
+        <div id="mainbody">
+          <div className="main-col-1">
+            <Infocontainer algorithm={this.state.currentAlgorithm} setalg={this.setAlgorithm} />
+          </div>
+          <div className="main-col-2">
+            <ButtonRow
+              setStartNode={this.setStartNode}
+              setFinishNode={this.setFinishNode}
+              resetSearch={this.resetSearch}
+              startSolving={this.startSolving}
+              stopSolving={this.stopSolving}
+            />
+            <Maingrid
+              nodes={this.state.nodes}
+              clickOnNode={this.handleClickOnNode}
+              clickOnRoute={this.handleClickOnRoute}
+            />
+          </div>
+          <div className="main-col-3">
+            <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
+          </div>
         </div>
-        <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
-      </div>
+      </>
     );
   }
 }
