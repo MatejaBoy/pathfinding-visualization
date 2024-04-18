@@ -17,6 +17,9 @@ function Navbar(props: NavbarProps) {
       case "wdbutton":
         alg = Algorithms.WD;
         break;
+      case "asbutton":
+        alg = Algorithms.AS;
+        break;
     }
     props.setAlg(alg);
   }
@@ -70,6 +73,14 @@ function Navbar(props: NavbarProps) {
                 <li>
                   <a id="wdbutton" onClick={clickOnAlgorithm} className="dropdown-item" href="#">
                     Weighted Dijkstra
+                  </a>
+                </li>
+                <li>
+                  <hr className="dropdown-divider" />
+                </li>
+                <li>
+                  <a id="asbutton" onClick={clickOnAlgorithm} className="dropdown-item" href="#">
+                    A* search
                   </a>
                 </li>
               </ul>

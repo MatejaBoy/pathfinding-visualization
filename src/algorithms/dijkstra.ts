@@ -118,28 +118,11 @@ export default class Dijkstra {
         let adjHeapIndex = this.heap.findByCoords(adj.x, adj.y);
         if (adjHeapIndex === -1) continue;
 
-        // If the path to the adj node from the current node is shorter than the distance
-        // it already has, we set its distance to the newly calculated one and set its prev node to the current
-        // ** The distance between two nodes is the sum of the their weights
-        /* if (currentNode.weight + adj.weight + this.heap.arr[0].dist < this.heap.arr[adjHeapIndex].dist) {
-          this.heap.arr[adjHeapIndex].prev = { x: currentNode.x, y: currentNode.y };
-          this.heap.decreaseKey(adjHeapIndex, currentNode.weight + adj.weight + this.heap.arr[0].dist);
-        }*/
-
         let distanceBetweenNodes: number;
-        if (adj.x === currentNode.x - 1) {
-          // Left adj
-          distanceBetweenNodes = adj.rightRouteWeight;
-        } else if (adj.x === currentNode.x + 1) {
-          // Right adj
-          distanceBetweenNodes = currentNode.rightRouteWeight;
-        } else if (adj.y === currentNode.y - 1) {
-          // Top adj
-          distanceBetweenNodes = adj.bottomRouteWeight;
-        } else {
-          // Bottom adj
-          distanceBetweenNodes = currentNode.bottomRouteWeight;
-        }
+        if (adj.x === currentNode.x - 1) distanceBetweenNodes = adj.rightRouteWeight;
+        else if (adj.x === currentNode.x + 1) distanceBetweenNodes = currentNode.rightRouteWeight;
+        else if (adj.y === currentNode.y - 1) distanceBetweenNodes = adj.bottomRouteWeight;
+        else distanceBetweenNodes = currentNode.bottomRouteWeight;
 
         if (distanceBetweenNodes + this.heap.arr[0].dist < this.heap.arr[adjHeapIndex].dist) {
           this.heap.arr[adjHeapIndex].prev = { x: currentNode.x, y: currentNode.y };
@@ -156,7 +139,6 @@ export default class Dijkstra {
       // backtracking to the Start Node to find the shortest path
       if (currentNode.type === PathPointType.Finish) {
         console.log("Finish found");
-        this.setSolving(false);
         this.dijkstraBacktrack(nodes, currentNode.x, currentNode.y, setstate);
         return;
       }

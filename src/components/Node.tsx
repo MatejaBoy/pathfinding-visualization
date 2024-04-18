@@ -25,7 +25,7 @@ interface NodeProps {
 export default function Node(node: NodeProps) {
   const [nodeType, setNodeType] = useState(node.nodeTypeProp);
   const [isVisited, setIsVisited] = useState(node.isVisitedProp);
-  //const [depth, setDepth] = useState(depthProp);
+  const [depth, setDepth] = useState(node.depthProp);
   const [isTest, setIsTest] = useState(node.isTestOnProp);
   const [rightRouteWidth, setRigthRouteWidth] = useState(node.rightRouteWeightProp);
   const [bottomRouteWidth, setBottomRouteWidth] = useState(node.bottomRouteWeightProp);
@@ -59,9 +59,9 @@ export default function Node(node: NodeProps) {
     setIsVisited(node.isVisitedProp);
   }, [node.isVisitedProp]);
 
-  /*useEffect(() => {
-    setDepth(depthProp);
-  }, [depthProp]);*/
+  useEffect(() => {
+    setDepth(node.depthProp);
+  }, [node.depthProp]);
 
   useEffect(() => {
     setIsTest(node.isTestOnProp);
@@ -130,7 +130,9 @@ export default function Node(node: NodeProps) {
         key={node.id}
         onMouseOver={onMouseMouseOver}
         onMouseDown={handleClick}
-      ></div>
+      >
+        {depth}
+      </div>
       <div
         style={styleRight}
         onClick={() => handleClickOnRoute("right")}

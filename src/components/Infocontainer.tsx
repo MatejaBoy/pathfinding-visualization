@@ -20,7 +20,7 @@ export default function Infocontainer(props: InfocontainerProps) {
   }
 
   function getTitle() {
-    let title = "";
+    let title;
     switch (alg) {
       case Algorithms.BFS:
         title = "Breadth First search";
@@ -29,10 +29,18 @@ export default function Infocontainer(props: InfocontainerProps) {
         title = "Depth First search";
         break;
       case Algorithms.IDDFS:
-        title = "Iterative Deepening Depth First search";
+        title = (
+          <>
+            Depth First search <br /> with Iterative Deepening
+          </>
+        );
         break;
       case Algorithms.WD:
         title = "Weighted Dijkstra search";
+        break;
+      case Algorithms.AS:
+        title = "A* search";
+        break;
     }
     return title;
   }

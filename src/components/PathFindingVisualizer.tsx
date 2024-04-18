@@ -8,6 +8,7 @@ import ButtonRow from "./Buttonrow.tsx";
 import Maingrid from "./Maingrid.tsx";
 import Infocontainer from "./Infocontainer.tsx";
 import CommonFuncs from "../algorithms/common-func.ts";
+import Astar from "../algorithms/Astar.ts";
 
 export interface NodeInterface {
   id: number;
@@ -51,10 +52,11 @@ export enum Algorithms {
   DFS,
   IDDFS,
   WD,
+  AS,
 }
 
 class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
-  gridsize: { x: number; y: number } = { x: 16, y: 10 };
+  gridsize: { x: number; y: number } = { x: 16, y: 20 };
   defaultSpeed: number = 90;
   constructor(props: any) {
     super(props);
@@ -66,7 +68,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       isSHeld: false,
       isFHeld: false,
       solvespeed: 1,
-      currentAlgorithm: Algorithms.DFS,
+      currentAlgorithm: Algorithms.AS,
     };
   }
 
@@ -131,6 +133,8 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     else if (this.state.currentAlgorithm === Algorithms.IDDFS)
       DepthFirstSearch.startDepthFirstSearch(...searchArgs, true);
     else if (this.state.currentAlgorithm === Algorithms.WD) Dijkstra.startDijkstraSearch(...searchArgs);
+    else if (this.state.currentAlgorithm === Algorithms.AS)
+      Astar.startAstarSearch(...searchArgs, this.state.finishNode);
   };
 
   stopSolving = () => {
@@ -138,6 +142,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     Dijkstra.setSolving(false);
     DepthFirstSearch.stopSolving();
     BreadthFirstSearch.stopSolving();
+    Astar.setSolving(false);
   };
 
   setAlgorithm = (alg: Algorithms) => {
@@ -164,7 +169,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   handleClickOnRoute = (nodeInfo: [number, number, number], dir: string) => {
     console.log("Click on route");
     if (this.state.isSolving) return;
-    if (this.state.currentAlgorithm !== Algorithms.WD) return;
+    if (this.state.currentAlgorithm !== Algorithms.WD && this.state.currentAlgorithm !== Algorithms.AS) return;
     const currentNode = this.state.nodes[nodeInfo[2]][nodeInfo[1]];
 
     if (dir === "right") {

@@ -27,8 +27,8 @@ export default class BreadthFirstSearch {
     queue = [];
     shortestRoute = [];
     visitedNodes = [];
-    this.breadthFirstSearch(nodes, startPoint, setstate);
     this.isSolving = true;
+    this.breadthFirstSearch(nodes, startPoint, setstate);
   }
 
   static stopSolving() {
@@ -161,14 +161,22 @@ export default class BreadthFirstSearch {
 
   // Function for finding the neighbouring elements of the given node
   // Input is the 2D array
-  static findAdjacents(nodes: NodeInterface[][], base_x: number, base_y: number) {
-    let adjacents = [];
 
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = 0; j < nodes[0].length; j++) {
-        const inColumnWithNode = Math.abs(nodes[i][j].y - base_y) === 1 && nodes[i][j].x == base_x;
-        const inRowWithNode = Math.abs(nodes[i][j].x - base_x) === 1 && nodes[i][j].y == base_y;
-        if (inRowWithNode || inColumnWithNode) adjacents.push(nodes[i][j]);
+  static findAdjacents(nodes: NodeInterface[][], base_x: number, base_y: number) {
+    let adjacents: NodeInterface[] = [];
+    const directions = [
+      { dy: 0, dx: -1 }, // Left
+      { dy: 0, dx: 1 }, // Right
+      { dy: -1, dx: 0 }, // Up
+      { dy: 1, dx: 0 }, // Down
+    ];
+
+    for (const dir of directions) {
+      const ny = base_y + dir.dy;
+      const nx = base_x + dir.dx;
+
+      if (ny >= 0 && ny < nodes.length && nx >= 0 && nx < nodes[ny].length && nodes[ny][nx]) {
+        adjacents.push(nodes[ny][nx]);
       }
     }
     return adjacents;
