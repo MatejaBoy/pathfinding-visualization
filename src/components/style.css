@@ -117,6 +117,22 @@
     width: 40px;
 }
 
+.grab {
+    cursor: move;
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+    .thumbnails-list{
+        cursor: pointer;
+    }
+}
+
+.grab:active {
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}
+
 @keyframes anim_route_right_1 {
     0% {scale: 200%}
     100% {scale: 100%}

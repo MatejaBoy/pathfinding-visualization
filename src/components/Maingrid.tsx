@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { NodeInterface } from "./PathFindingVisualizer";
+import { NodeInterface, PathPointType } from "./PathFindingVisualizer";
 import { MemoizedNode } from "./Node";
+import { Point } from "../algorithms/common-func";
 
 interface MaingridProps {
   nodes: NodeInterface[][];
   clickOnNode: (nodeInfo: [number, number, number], drag: boolean) => void;
   clickOnRoute: (nodeInfo: [number, number, number], dir: string) => void;
+  dropOnNode: () => void;
+  setNodeType: (nodeInfo: Point, type: PathPointType) => void;
 }
 
 export default function Maingrid(props: MaingridProps) {
@@ -34,7 +37,9 @@ export default function Maingrid(props: MaingridProps) {
                     isTestOnProp={node.isTestOnProp}
                     weight={node.weight}
                     clickOnNode={props.clickOnNode}
+                    setNodeType={props.setNodeType}
                     clickOnRoute={props.clickOnRoute}
+                    dropOnNode={props.dropOnNode}
                     isLastRow={node.isLastRow}
                     isLastCol={node.isLastCol}
                     rightRouteWeightProp={node.rightRouteWeight}

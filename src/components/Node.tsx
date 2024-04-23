@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../App.tsx";
 import "./style.css";
 import { PathPointType } from "./PathFindingVisualizer.tsx";
+import CommonFuncs, { Point } from "../algorithms/common-func.ts";
 
 interface NodeProps {
   id: number;
@@ -13,6 +14,8 @@ interface NodeProps {
   isTestOnProp: boolean;
   weight: number;
   clickOnNode: (nodeInfo: [number, number, number], drag: boolean) => void;
+  dropOnNode: (nodeInfo: Point) => void;
+  setNodeType: (nodeInfo: Point, type: PathPointType) => void;
   clickOnRoute: (nodeInfo: [number, number, number], dir: string) => void;
   isLastRow: boolean;
   isLastCol: boolean;
@@ -33,8 +36,11 @@ export default function Node(node: NodeProps) {
   const [isRightRoutePath, setIsRightRoutePath] = useState(node.isRightRoutePathProp);
   const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
   const [toAnimate, setToAnimate] = useState(node.toAnimateProp);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isScaleAnim, setIsScaleAnim] = useState(false);
 
   function handleClick() {
+    if (isDragging) return;
     node.clickOnNode([node.id, node.x, node.y], false);
   }
 
@@ -45,6 +51,8 @@ export default function Node(node: NodeProps) {
   // Handling dragging the mouse over a Node
   // -- calling clickOnNode with drag=true --
   function onMouseMouseOver(e: React.MouseEvent) {
+    //console.log("On mouse over is dragging: " + isDragging);
+    if (isDragging) return;
     if (e.buttons) {
       node.clickOnNode([node.id, node.x, node.y], true);
     }
@@ -89,19 +97,56 @@ export default function Node(node: NodeProps) {
     setIsBottomRoutePath(node.isBottomRoutePathProp);
   }, [node.isBottomRoutePathProp]);
 
-  function getClassModifier() {
-    switch (nodeType) {
-      case PathPointType.Normal:
-        return "normal";
-      case PathPointType.Wall:
-        return "wall";
-      case PathPointType.Start:
-        return "start";
-      case PathPointType.Finish:
-        return "finish";
-      case PathPointType.RouteNode:
-        return "routenode";
-    }
+  function onDragOver(event: React.DragEvent<HTMLDivElement>) {
+    //console.log("onDragOver");
+    event.preventDefault();
+  }
+  async function onDragEnter(event: React.DragEvent<HTMLDivElement>) {
+    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+    if (isScaleAnim) return;
+    event.preventDefault();
+    console.log("onDragEnter");
+    console.log(event.dataTransfer.types[0]);
+    let type = parseInt(event.dataTransfer.types[0]) as PathPointType;
+    setIsScaleAnim(true);
+    node.setNodeType({ x: node.x, y: node.y }, type);
+    //event.dataTransfer.setDragImage(dragImage, 0, 0);
+    await CommonFuncs.timeout(500);
+    setIsScaleAnim(false);
+  }
+
+  async function onDragLeave(event: React.DragEvent<HTMLDivElement>) {
+    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+    console.log("onDragLeave");
+    setIsScaleAnim(true);
+    node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal);
+    await CommonFuncs.timeout(500);
+    setIsScaleAnim(false);
+  }
+  function onDragStart(event: React.DragEvent<HTMLElement>) {
+    setIsDragging(true);
+    console.log("onDragStart");
+    event.dataTransfer.clearData();
+    event.dataTransfer.setData(nodeType.toString(), "sajt");
+  }
+
+  function onDragEnd(event: React.DragEvent<HTMLElement>) {
+    console.log("onDragEnd");
+    setIsDragging(false);
+  }
+
+  function getIcon() {
+    let visible = nodeType == PathPointType.Start;
+    let icon = (
+      <i
+        hidden={!visible}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        draggable="true"
+        className="grab fa fa-cloud"
+      ></i>
+    );
+    return icon;
   }
 
   function getVisitedModifier() {
@@ -122,6 +167,21 @@ export default function Node(node: NodeProps) {
     else return "_" + bottomRouteWidth.toString() + " routepath";
   }
 
+  function getClassModifier() {
+    switch (nodeType) {
+      case PathPointType.Normal:
+        return "normal";
+      case PathPointType.Wall:
+        return "wall";
+      case PathPointType.Start:
+        return "start";
+      case PathPointType.Finish:
+        return "finish";
+      case PathPointType.RouteNode:
+        return "routenode";
+    }
+  }
+
   let styleRight = {
     display: node.isLastCol ? "none" : "block",
   };
@@ -136,8 +196,11 @@ export default function Node(node: NodeProps) {
         key={node.id}
         onMouseOver={onMouseMouseOver}
         onMouseDown={handleClick}
+        onDragEnter={onDragEnter}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
       >
-        {depth}
+        {getIcon()}
       </div>
       <div
         style={styleRight}

@@ -7,7 +7,7 @@ import Dijkstra from "../algorithms/dijkstra.ts";
 import ButtonRow from "./Buttonrow.tsx";
 import Maingrid from "./Maingrid.tsx";
 import Infocontainer from "./Infocontainer.tsx";
-import CommonFuncs from "../algorithms/common-func.ts";
+import CommonFuncs, { Point } from "../algorithms/common-func.ts";
 import Astar from "../algorithms/Astar.ts";
 
 export interface NodeInterface {
@@ -153,7 +153,6 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   };
 
   handleClickOnNode = (nodeInfo: [number, number, number], drag: boolean) => {
-    //console.log("hadnleCLick");
     if (this.state.isSolving) return;
     const currentNode = this.state.nodes[nodeInfo[2]][nodeInfo[1]];
     if (currentNode.type === PathPointType.Start) return;
@@ -184,6 +183,16 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       else currentNode.bottomRouteWeight = 1;
       this.setState({});
     }
+  };
+
+  handleDropOnNode = () => {
+    if (this.state.isSolving) return;
+  };
+
+  setPointType = (nodeInfo: Point, type: PathPointType) => {
+    if (this.state.isSolving) return;
+    this.state.nodes[nodeInfo.y][nodeInfo.x].type = type;
+    this.setState({});
   };
 
   componentDidMount(): void {
@@ -269,6 +278,8 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
               nodes={this.state.nodes}
               clickOnNode={this.handleClickOnNode}
               clickOnRoute={this.handleClickOnRoute}
+              dropOnNode={this.handleDropOnNode}
+              setNodeType={this.setPointType}
             />
           </div>
           <div className="main-col-3">
