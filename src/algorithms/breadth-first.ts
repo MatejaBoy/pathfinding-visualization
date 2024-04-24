@@ -48,7 +48,7 @@ export default class BreadthFirstSearch {
   static async visualizeBFS(setstate: Function) {
     // Visualize visited nodes
     for (const node of visitedNodes) {
-      await CommonFuncs.timeout(25);
+      //await CommonFuncs.timeout(25);
       node.toAnimate = true;
       setstate();
     }
@@ -71,13 +71,11 @@ export default class BreadthFirstSearch {
   // the Start node while choosing the the cells with the lowest distance from the Start node
   static async findShortestRoute(checkNode: NodeInterface, nodes: NodeInterface[][], setstate: Function) {
     if (!this.isSolving) return;
-    console.log("find shortest runs");
     // Exit clause to exit the recursion if we get back to the Start node
     if (checkNode.type === PathPointType.Start) {
       console.warn("BFS has finished, starting visualization");
       stopTime = new Date().getTime();
       stopTimePerf = performance.now();
-      console.log(stopTime);
       console.log("Time it took to run the find the route: " + (stopTime - startTime));
       console.log("Time it took to run the find the route with perf: " + (stopTimePerf - startTimePerf));
       this.visualizeBFS(setstate);

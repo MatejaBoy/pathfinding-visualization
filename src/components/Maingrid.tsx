@@ -8,7 +8,10 @@ interface MaingridProps {
   clickOnNode: (nodeInfo: [number, number, number], drag: boolean) => void;
   clickOnRoute: (nodeInfo: [number, number, number], dir: string) => void;
   dropOnNode: () => void;
-  setNodeType: (nodeInfo: Point, type: PathPointType) => void;
+  setNodeType: Function;
+  setDragData: (on: boolean, type: PathPointType | null) => void;
+  isDraggingNode: boolean;
+  dragData: PathPointType | null;
 }
 
 export default function Maingrid(props: MaingridProps) {
@@ -40,6 +43,7 @@ export default function Maingrid(props: MaingridProps) {
                     setNodeType={props.setNodeType}
                     clickOnRoute={props.clickOnRoute}
                     dropOnNode={props.dropOnNode}
+                    setDragData={props.setDragData}
                     isLastRow={node.isLastRow}
                     isLastCol={node.isLastCol}
                     rightRouteWeightProp={node.rightRouteWeight}
@@ -47,6 +51,8 @@ export default function Maingrid(props: MaingridProps) {
                     isRightRoutePathProp={node.isRightRoutePath}
                     isBottomRoutePathProp={node.isBottomRoutePath}
                     toAnimateProp={node.toAnimate}
+                    dragData={props.dragData}
+                    isDraggingNode={props.isDraggingNode}
                   />
                 );
               })}

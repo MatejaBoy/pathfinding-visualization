@@ -38,6 +38,8 @@ interface PathFindingVisualizerState {
   isFHeld: boolean;
   solvespeed: number;
   currentAlgorithm: Algorithms;
+  isDraggingNode: boolean;
+  dragData: PathPointType | null;
 }
 
 export enum PathPointType {
@@ -70,6 +72,8 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       isFHeld: false,
       solvespeed: 1,
       currentAlgorithm: Algorithms.BFS,
+      isDraggingNode: false,
+      dragData: null,
     };
   }
 
@@ -189,10 +193,28 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     if (this.state.isSolving) return;
   };
 
-  setPointType = (nodeInfo: Point, type: PathPointType) => {
+  setPointType = (nodeInfo: Point, type: PathPointType, prevType: PathPointType) => {
     if (this.state.isSolving) return;
     this.state.nodes[nodeInfo.y][nodeInfo.x].type = type;
-    this.setState({});
+    if (type === PathPointType.Normal) {
+      if (prevType === PathPointType.Start) this.setState({ startNode: undefined });
+      if (prevType === PathPointType.Finish) this.setState({ finishNode: undefined });
+    } else if (type === PathPointType.Start) {
+      this.setState({ startNode: nodeInfo });
+    } else if ((type = PathPointType.Finish)) {
+      this.setState({ finishNode: nodeInfo });
+    } else {
+      this.setState({});
+    }
+  };
+
+  setDragData = (on: boolean, type: PathPointType | null) => {
+    console.log("Set drag: " + on);
+    console.log("Drag type: " + type);
+    this.setState({
+      isDraggingNode: on,
+      dragData: type,
+    });
   };
 
   componentDidMount(): void {
@@ -252,15 +274,24 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
         n.bottomRouteWeight = 1;
         n.isBottomRoutePath = false;
         n.isRightRoutePath = false;
+        n.toAnimate = false;
       }
     }
 
     this.setState({ startNode: undefined, finishNode: undefined, isSolving: false });
   };
 
+  getMainClassName = () => {
+    if (this.state.isDraggingNode) {
+      return "dragging _" + this.state.dragData;
+    } else {
+      return "";
+    }
+  };
+
   render() {
     return (
-      <>
+      <div className={this.getMainClassName()}>
         <Navbar setAlg={this.setAlgorithm} />
         <div id="mainbody">
           <div className="main-col-1">
@@ -280,13 +311,16 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
               clickOnRoute={this.handleClickOnRoute}
               dropOnNode={this.handleDropOnNode}
               setNodeType={this.setPointType}
+              setDragData={this.setDragData}
+              dragData={this.state.dragData}
+              isDraggingNode={this.state.isDraggingNode}
             />
           </div>
           <div className="main-col-3">
             <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
           </div>
         </div>
-      </>
+      </div>
     );
   }
 }

@@ -1,9 +1,11 @@
+import { Component } from "react";
+
 export interface Point {
   x: number;
   y: number;
 }
 
-export default class CommonFuncs {
+export default class CommonFuncs extends Component<{}, {}> {
   static timeout(delay: number) {
     return new Promise((res) => setTimeout(res, delay));
   }

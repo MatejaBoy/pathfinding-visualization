@@ -10,8 +10,8 @@
     border-style: none;
     border-width: 0.01px;
     text-overflow: ellipsis;
-    font-size: 8px;
-    padding: 5px !important;   
+    /*font-size: 8px;*/
+    /*padding: 5px !important;*/  
     user-select: none;
     /*margin: 10px;*/
     border-radius: 50%;
@@ -22,6 +22,8 @@
     text-justify: center;
     align-content: center;
     text-align: center;
+    white-space: nowrap;
+
 }
 
 .tilewrapper{
@@ -117,6 +119,10 @@
     width: 40px;
 }
 
+.dragging._2{
+    cursor: url(../assets/skip-end-circle-fill-big.svg) 10 10, auto !important;
+}
+
 .grab {
     cursor: move;
     cursor: grab;
@@ -125,6 +131,7 @@
     .thumbnails-list{
         cursor: pointer;
     }
+    
 }
 
 .grab:active {
@@ -207,6 +214,7 @@
     border: none !important;
     animation-name: anim_start;
     animation-duration: .5s;
+    
 }
 
 .tile.finish{
@@ -403,6 +411,7 @@ body {
     background-color: white !important;
     font-family: 'Montserrat' !important;
     user-select: none;
+    
 }
 
 

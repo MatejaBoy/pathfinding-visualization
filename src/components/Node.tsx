@@ -3,6 +3,7 @@ import "../App.tsx";
 import "./style.css";
 import { PathPointType } from "./PathFindingVisualizer.tsx";
 import CommonFuncs, { Point } from "../algorithms/common-func.ts";
+import SVGComp, { SvgIcons } from "./SVG_comp.tsx";
 
 interface NodeProps {
   id: number;
@@ -15,8 +16,9 @@ interface NodeProps {
   weight: number;
   clickOnNode: (nodeInfo: [number, number, number], drag: boolean) => void;
   dropOnNode: (nodeInfo: Point) => void;
-  setNodeType: (nodeInfo: Point, type: PathPointType) => void;
+  setNodeType: Function;
   clickOnRoute: (nodeInfo: [number, number, number], dir: string) => void;
+  setDragData: (on: boolean, type: PathPointType | null) => void;
   isLastRow: boolean;
   isLastCol: boolean;
   rightRouteWeightProp: number;
@@ -24,6 +26,8 @@ interface NodeProps {
   isRightRoutePathProp: boolean;
   isBottomRoutePathProp: boolean;
   toAnimateProp: boolean;
+  isDraggingNode: boolean;
+  dragData: PathPointType | null;
 }
 
 export default function Node(node: NodeProps) {
@@ -52,7 +56,10 @@ export default function Node(node: NodeProps) {
   // -- calling clickOnNode with drag=true --
   function onMouseMouseOver(e: React.MouseEvent) {
     //console.log("On mouse over is dragging: " + isDragging);
-    if (isDragging) return;
+
+    if (node.isDraggingNode) {
+      node.setNodeType({ x: node.x, y: node.y }, node.dragData!);
+    }
     if (e.buttons) {
       node.clickOnNode([node.id, node.x, node.y], true);
     }
@@ -97,6 +104,22 @@ export default function Node(node: NodeProps) {
     setIsBottomRoutePath(node.isBottomRoutePathProp);
   }, [node.isBottomRoutePathProp]);
 
+  function mouseDownOnDraggable(event: React.MouseEvent<HTMLSpanElement>) {
+    console.log("On mouse down on draggable");
+    node.setDragData(true, nodeType);
+  }
+
+  function mouseUpOnDraggable(event: React.MouseEvent<HTMLSpanElement>) {
+    console.log("On mouse up");
+    node.setDragData(false, null);
+  }
+
+  function onMouseLeave() {
+    if (node.isDraggingNode) {
+      node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal, nodeType);
+    }
+  }
+
   function onDragOver(event: React.DragEvent<HTMLDivElement>) {
     //console.log("onDragOver");
     event.preventDefault();
@@ -135,18 +158,39 @@ export default function Node(node: NodeProps) {
     setIsDragging(false);
   }
 
+  function getDraggable() {
+    let visible = nodeType == PathPointType.Start || nodeType == PathPointType.Finish;
+    let icon = nodeType == PathPointType.Start ? SvgIcons.start : SvgIcons.finish;
+    let draggable = (
+      <span
+        id={node.id.toString()}
+        hidden={!visible}
+        onMouseDown={mouseDownOnDraggable}
+        onMouseUp={mouseUpOnDraggable}
+        style={{ display: "block", minWidth: "25px", minHeight: "25px" }}
+      >
+        <SVGComp icon={icon} />
+      </span>
+    );
+    return draggable;
+  }
+
   function getIcon() {
-    let visible = nodeType == PathPointType.Start;
-    let icon = (
-      <i
+    let visible = nodeType == PathPointType.Start || nodeType == PathPointType.Finish;
+    let icon = nodeType == PathPointType.Start ? SvgIcons.start : SvgIcons.finish;
+
+    let draggable = (
+      <span
         hidden={!visible}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
+        style={{ display: "block", minWidth: "25px", minHeight: "25px" }}
         draggable="true"
-        className="grab fa fa-cloud"
-      ></i>
+      >
+        <SVGComp icon={icon} />
+      </span>
     );
-    return icon;
+    return draggable;
   }
 
   function getVisitedModifier() {
@@ -196,11 +240,12 @@ export default function Node(node: NodeProps) {
         key={node.id}
         onMouseOver={onMouseMouseOver}
         onMouseDown={handleClick}
+        onMouseLeave={onMouseLeave}
         onDragEnter={onDragEnter}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
       >
-        {getIcon()}
+        {getDraggable()}
       </div>
       <div
         style={styleRight}
