@@ -5,15 +5,15 @@
 
 
 .tile {
-    min-height: 25px !important;
-    min-width: 25px !important;
+    min-height: 30px !important;
+    min-width: 30px !important;
     border-style: none;
     border-width: 0.01px;
     text-overflow: ellipsis;
     /*font-size: 8px;*/
     /*padding: 5px !important;*/  
     user-select: none;
-    /*margin: 10px;*/
+    margin: 10px;   
     border-radius: 50%;
     position:absolute;
     z-index: 1;
@@ -27,8 +27,8 @@
 }
 
 .tilewrapper{
-    min-height: 25px !important;
-    min-width: 25px !important;
+    min-height: 30px !important;
+    min-width: 30px !important;
     border-style: none;
     border-width: 0.01px;
     text-overflow: ellipsis;
@@ -50,9 +50,10 @@
     content: "";
     position: absolute;
     z-index: 0;
-    width: 25px;
+    width: 32px;
     height: 2px;
-    background-color: rgb(191,161,143);
+    /*background-color: rgb(191,161,143);*/
+    background-color: #212529;
 
 }
 .route_right{
@@ -98,13 +99,13 @@
     animation-name: anim_route_right_2;
     animation-duration: .5s;
     height: 6px;
-    width: 26px;
+    width: 30px;
 }
 .route_bottom._3{
     animation-name: anim_route_right_3;
     animation-duration: .5s;
     height: 10px;
-    width: 27px
+    width: 30px
 }
 .route_bottom._4{
     animation-name: anim_route_right_4;
@@ -195,22 +196,24 @@
     animation-duration: .5s;
     /*background-color: #9e9e9e;*/
     /*background-color: rgb(166,113,83);*/
-    background-color: rgb(191,161,143);
+    /*background-color: rgb(191,161,143);*/
+    background-color: #212529;
     border:none;
-    border-width: 1.5px;
-    border-color: rgb(112, 77, 56);
+    border-width: 2px;
+    border-color: gray;
     
 }
 .tile.wall{
-    background-color: black;
+    background-color: white;
     animation-name: anim_wall;
     animation-duration: .5s;
-    border-color: white !important;
+    border-color: #212529 !important;
     border: none;
 }
 
 .tile.start{
     background-color: rgb(158, 191, 86) !important;
+    /*background-color: white !important;*/
     border: none !important;
     animation-name: anim_start;
     animation-duration: .5s;
@@ -403,7 +406,7 @@ input[type=range] {
 }
 
 li+li {
-    margin-top: 10px;
+    /*margin-top: 10px;*/
 }
 
 body {

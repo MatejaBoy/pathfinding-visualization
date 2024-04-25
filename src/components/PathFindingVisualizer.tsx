@@ -289,22 +289,28 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     }
   };
 
+  handleMouseLeaveMainGrid = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!this.state.isDraggingNode) return;
+    console.log("leaving maingrid");
+    this.setDragData(false, null);
+  };
+
   render() {
     return (
       <div className={this.getMainClassName()}>
-        <Navbar setAlg={this.setAlgorithm} />
+        <Navbar
+          setAlg={this.setAlgorithm}
+          setStartNode={this.setStartNode}
+          setFinishNode={this.setFinishNode}
+          resetSearch={this.resetSearch}
+          startSolving={this.startSolving}
+          stopSolving={this.stopSolving}
+        />
         <div id="mainbody">
           <div className="main-col-1">
             <Infocontainer algorithm={this.state.currentAlgorithm} setalg={this.setAlgorithm} />
           </div>
           <div className="main-col-2">
-            <ButtonRow
-              setStartNode={this.setStartNode}
-              setFinishNode={this.setFinishNode}
-              resetSearch={this.resetSearch}
-              startSolving={this.startSolving}
-              stopSolving={this.stopSolving}
-            />
             <Maingrid
               nodes={this.state.nodes}
               clickOnNode={this.handleClickOnNode}
@@ -314,6 +320,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
               setDragData={this.setDragData}
               dragData={this.state.dragData}
               isDraggingNode={this.state.isDraggingNode}
+              mouseLeaveMainGrid={this.handleMouseLeaveMainGrid}
             />
           </div>
           <div className="main-col-3">

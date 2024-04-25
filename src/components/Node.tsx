@@ -120,72 +120,19 @@ export default function Node(node: NodeProps) {
     }
   }
 
-  function onDragOver(event: React.DragEvent<HTMLDivElement>) {
-    //console.log("onDragOver");
-    event.preventDefault();
-  }
-  async function onDragEnter(event: React.DragEvent<HTMLDivElement>) {
-    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
-    if (isScaleAnim) return;
-    event.preventDefault();
-    console.log("onDragEnter");
-    console.log(event.dataTransfer.types[0]);
-    let type = parseInt(event.dataTransfer.types[0]) as PathPointType;
-    setIsScaleAnim(true);
-    node.setNodeType({ x: node.x, y: node.y }, type);
-    //event.dataTransfer.setDragImage(dragImage, 0, 0);
-    await CommonFuncs.timeout(500);
-    setIsScaleAnim(false);
-  }
-
-  async function onDragLeave(event: React.DragEvent<HTMLDivElement>) {
-    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
-    console.log("onDragLeave");
-    setIsScaleAnim(true);
-    node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal);
-    await CommonFuncs.timeout(500);
-    setIsScaleAnim(false);
-  }
-  function onDragStart(event: React.DragEvent<HTMLElement>) {
-    setIsDragging(true);
-    console.log("onDragStart");
-    event.dataTransfer.clearData();
-    event.dataTransfer.setData(nodeType.toString(), "sajt");
-  }
-
-  function onDragEnd(event: React.DragEvent<HTMLElement>) {
-    console.log("onDragEnd");
-    setIsDragging(false);
-  }
-
   function getDraggable() {
-    let visible = nodeType == PathPointType.Start || nodeType == PathPointType.Finish;
-    let icon = nodeType == PathPointType.Start ? SvgIcons.start : SvgIcons.finish;
+    let visible = !(nodeType === PathPointType.Normal);
+    let icon = nodeType == PathPointType.Start ? SvgIcons.skipendfill : SvgIcons.trophy;
+    if (nodeType === PathPointType.Start) icon = SvgIcons.skipendfill;
+    if (nodeType === PathPointType.Finish) icon = SvgIcons.trophy;
+    if (nodeType === PathPointType.Wall) icon = SvgIcons.wall;
     let draggable = (
       <span
         id={node.id.toString()}
         hidden={!visible}
         onMouseDown={mouseDownOnDraggable}
         onMouseUp={mouseUpOnDraggable}
-        style={{ display: "block", minWidth: "25px", minHeight: "25px" }}
-      >
-        <SVGComp icon={icon} />
-      </span>
-    );
-    return draggable;
-  }
-
-  function getIcon() {
-    let visible = nodeType == PathPointType.Start || nodeType == PathPointType.Finish;
-    let icon = nodeType == PathPointType.Start ? SvgIcons.start : SvgIcons.finish;
-
-    let draggable = (
-      <span
-        hidden={!visible}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        style={{ display: "block", minWidth: "25px", minHeight: "25px" }}
-        draggable="true"
+        style={{ display: "block", minWidth: "25px", minHeight: "25px", alignContent: "center" }}
       >
         <SVGComp icon={icon} />
       </span>
@@ -241,9 +188,6 @@ export default function Node(node: NodeProps) {
         onMouseOver={onMouseMouseOver}
         onMouseDown={handleClick}
         onMouseLeave={onMouseLeave}
-        onDragEnter={onDragEnter}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
       >
         {getDraggable()}
       </div>

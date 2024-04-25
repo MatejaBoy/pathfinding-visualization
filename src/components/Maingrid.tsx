@@ -12,6 +12,7 @@ interface MaingridProps {
   setDragData: (on: boolean, type: PathPointType | null) => void;
   isDraggingNode: boolean;
   dragData: PathPointType | null;
+  mouseLeaveMainGrid: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function Maingrid(props: MaingridProps) {
@@ -23,7 +24,7 @@ export default function Maingrid(props: MaingridProps) {
 
   return (
     <>
-      <div key={"maingrid"} id="maingrid" className="">
+      <div onMouseLeave={props.mouseLeaveMainGrid} key={"maingrid"} id="maingrid" className="">
         {nodes.map((nodeRow, rowIndex) => {
           return (
             <div key={rowIndex} className="gridrow">

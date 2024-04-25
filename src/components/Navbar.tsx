@@ -2,6 +2,11 @@ import { Algorithms } from "./PathFindingVisualizer";
 
 interface NavbarProps {
   setAlg: Function;
+  setStartNode: () => void;
+  setFinishNode: () => void;
+  startSolving: () => void;
+  stopSolving: () => void;
+  resetSearch: () => void;
 }
 
 function Navbar(props: NavbarProps) {
@@ -45,7 +50,7 @@ function Navbar(props: NavbarProps) {
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item dropdown">
               <a
-                className="nav-link dropdown-toggle"
+                className="nav-link active dropdown-toggle"
                 href="#"
                 role="button"
                 data-bs-toggle="dropdown"
@@ -84,6 +89,45 @@ function Navbar(props: NavbarProps) {
                   </a>
                 </li>
               </ul>
+            </li>
+            <li className="nav-item">
+              <a
+                href="#"
+                aria-expanded="false"
+                role="button"
+                className="nav-link active"
+                id="startnodebutton"
+                key={"startnodebutton"}
+                onClick={props.setStartNode}
+              >
+                Set start node
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                role="button"
+                className="nav-link active"
+                id="finishnodebutton"
+                key={"finishnodebutton"}
+                onClick={props.setFinishNode}
+              >
+                Set finish node
+              </a>
+            </li>
+            <li className="nav-item">
+              <a role="button" className="nav-link active" key={"startSolvingButton"} onClick={props.startSolving}>
+                Start solving
+              </a>
+            </li>
+            <li className="nav-item">
+              <a role="button" className="nav-link active" key={"stopSolvingButton"} onClick={props.stopSolving}>
+                Stop solving
+              </a>
+            </li>
+            <li className="nav-item">
+              <a role="button" className="nav-link active" key={"resetButton"} onClick={props.resetSearch}>
+                Reset search
+              </a>
             </li>
           </ul>
         </div>
