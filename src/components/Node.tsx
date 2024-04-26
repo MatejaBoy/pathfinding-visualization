@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../App.tsx";
 import "./style.css";
-import { PathPointType } from "./PathFindingVisualizer.tsx";
-import CommonFuncs, { Point } from "../algorithms/common-func.ts";
-import SVGComp, { SvgIcons } from "./SVG_comp.tsx";
+import { DragData, PathPointType } from "./PathFindingVisualizer.tsx";
 
 interface NodeProps {
   id: number;
@@ -14,11 +12,9 @@ interface NodeProps {
   depthProp: number;
   isTestOnProp: boolean;
   weight: number;
-  clickOnNode: (nodeInfo: [number, number, number], drag: boolean) => void;
-  dropOnNode: (nodeInfo: Point) => void;
   setNodeType: Function;
   clickOnRoute: (nodeInfo: [number, number, number], dir: string) => void;
-  setDragData: (on: boolean, type: PathPointType | null) => void;
+  setDragData: (data: DragData | null) => void;
   isLastRow: boolean;
   isLastCol: boolean;
   rightRouteWeightProp: number;
@@ -26,47 +22,24 @@ interface NodeProps {
   isRightRoutePathProp: boolean;
   isBottomRoutePathProp: boolean;
   toAnimateProp: boolean;
-  isDraggingNode: boolean;
-  dragData: PathPointType | null;
+  isDraggingWall: boolean;
+  dragData: DragData | null;
 }
 
 export default function Node(node: NodeProps) {
   const [nodeType, setNodeType] = useState(node.nodeTypeProp);
-  const [isVisited, setIsVisited] = useState(node.isVisitedProp);
-  const [depth, setDepth] = useState(node.depthProp);
   const [isTest, setIsTest] = useState(node.isTestOnProp);
   const [rightRouteWidth, setRigthRouteWidth] = useState(node.rightRouteWeightProp);
   const [bottomRouteWidth, setBottomRouteWidth] = useState(node.bottomRouteWeightProp);
   const [isRightRoutePath, setIsRightRoutePath] = useState(node.isRightRoutePathProp);
   const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
   const [toAnimate, setToAnimate] = useState(node.toAnimateProp);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isScaleAnim, setIsScaleAnim] = useState(false);
+  const [isVisited, setIsVisited] = useState(node.isVisitedProp);
+  //const [depth, setDepth] = useState(node.depthProp);
+  // const [isDragging, setIsDragging] = useState(false);
+  // const [isScaleAnim, setIsScaleAnim] = useState(false);
 
-  function handleClick() {
-    if (isDragging) return;
-    node.clickOnNode([node.id, node.x, node.y], false);
-  }
-
-  function handleClickOnRoute(dir: string) {
-    node.clickOnRoute([node.id, node.x, node.y], dir);
-  }
-
-  // Handling dragging the mouse over a Node
-  // -- calling clickOnNode with drag=true --
-  function onMouseMouseOver(e: React.MouseEvent) {
-    //console.log("On mouse over is dragging: " + isDragging);
-
-    if (node.isDraggingNode) {
-      node.setNodeType({ x: node.x, y: node.y }, node.dragData!);
-    }
-    if (e.buttons) {
-      node.clickOnNode([node.id, node.x, node.y], true);
-    }
-  }
-
-  // When the prop nodeTypeProp changes,
-  // we set the state variable nodeType to the new nodeTypeProp value
+  let shouldStartDrag = false;
 
   useEffect(() => {
     setToAnimate(node.toAnimateProp);
@@ -80,9 +53,9 @@ export default function Node(node: NodeProps) {
     setIsVisited(node.isVisitedProp);
   }, [node.isVisitedProp]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     setDepth(node.depthProp);
-  }, [node.depthProp]);
+  }, [node.depthProp]);*/
 
   useEffect(() => {
     setIsTest(node.isTestOnProp);
@@ -104,45 +77,51 @@ export default function Node(node: NodeProps) {
     setIsBottomRoutePath(node.isBottomRoutePathProp);
   }, [node.isBottomRoutePathProp]);
 
-  function mouseDownOnDraggable(event: React.MouseEvent<HTMLSpanElement>) {
-    console.log("On mouse down on draggable");
-    node.setDragData(true, nodeType);
-  }
-
-  function mouseUpOnDraggable(event: React.MouseEvent<HTMLSpanElement>) {
-    console.log("On mouse up");
-    node.setDragData(false, null);
-  }
-
-  function onMouseLeave() {
-    if (node.isDraggingNode) {
-      node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal, nodeType);
+  // Handling dragging the mouse over a Node
+  // -- calling clickOnNode with drag=true --
+  function onMouseMouseOver(e: React.MouseEvent) {
+    if (node.dragData !== null) {
+      console.log("dragdata");
+      console.log(node.dragData);
+      node.setNodeType({ x: node.dragData.prevNode.x, y: node.dragData.prevNode.y }, PathPointType.Normal);
+      node.setNodeType({ x: node.x, y: node.y }, node.dragData!.nodetype);
+      node.setDragData({ nodetype: node.dragData.nodetype, prevNode: { x: node.x, y: node.y } });
+      return;
+    }
+    if (e.buttons && nodeType === PathPointType.Normal) {
+      // SETTING TO WALL BY DRAG
+      if (nodeType === PathPointType.Normal) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Wall);
     }
   }
 
-  function getDraggable() {
-    let visible = !(nodeType === PathPointType.Normal);
-    let icon = nodeType == PathPointType.Start ? SvgIcons.skipendfill : SvgIcons.trophy;
-    if (nodeType === PathPointType.Start) icon = SvgIcons.skipendfill;
-    if (nodeType === PathPointType.Finish) icon = SvgIcons.trophy;
-    if (nodeType === PathPointType.Wall) icon = SvgIcons.wall;
-    let draggable = (
-      <span
-        id={node.id.toString()}
-        hidden={!visible}
-        onMouseDown={mouseDownOnDraggable}
-        onMouseUp={mouseUpOnDraggable}
-        style={{ display: "block", minWidth: "25px", minHeight: "25px", alignContent: "center" }}
-      >
-        <SVGComp icon={icon} />
-      </span>
-    );
-    return draggable;
+  function onMouseDown() {
+    console.log("onMouseDown");
+    if (nodeType === PathPointType.Start || nodeType === PathPointType.Finish) {
+      shouldStartDrag = true;
+    }
+    if (nodeType === PathPointType.Normal || nodeType === PathPointType.Wall) {
+      if (nodeType === PathPointType.Normal) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Wall);
+      if (nodeType === PathPointType.Wall) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal);
+    }
+  }
+
+  function handleClickOnRoute(dir: string) {
+    node.clickOnRoute([node.id, node.x, node.y], dir);
+  }
+
+  function onMouseLeave(event: React.MouseEvent<HTMLDivElement>) {
+    if (nodeType !== PathPointType.Start && nodeType != PathPointType.Finish) return;
+
+    if (event.buttons && shouldStartDrag) {
+      node.setDragData({ nodetype: nodeType, prevNode: { x: node.x, y: node.y } });
+      node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal, nodeType);
+      shouldStartDrag = false;
+    }
   }
 
   function getVisitedModifier() {
-    if (toAnimate == true) return "visited";
-    if (isTest == true) return "testcolor";
+    if (isTest && toAnimate) return "testcolor";
+    else if (isVisited && toAnimate == true) return "visited";
     else return "";
   }
 
@@ -173,31 +152,26 @@ export default function Node(node: NodeProps) {
     }
   }
 
-  let styleRight = {
-    display: node.isLastCol ? "none" : "block",
-  };
-  let styleBottom = {
-    display: node.isLastRow ? "none" : "block",
-  };
-
   let returnDiv = (
     <div className="tilewrapper">
       <div
         className={"tile" + " " + getClassModifier() + " " + getVisitedModifier()}
         key={node.id}
         onMouseOver={onMouseMouseOver}
-        onMouseDown={handleClick}
+        onMouseDown={onMouseDown}
         onMouseLeave={onMouseLeave}
-      >
-        {getDraggable()}
-      </div>
+      ></div>
       <div
-        style={styleRight}
+        style={{
+          display: node.isLastCol ? "none" : "block",
+        }}
         onClick={() => handleClickOnRoute("right")}
         className={"route_right" + " " + getClassModifierRightRoute()}
       ></div>
       <div
-        style={styleBottom}
+        style={{
+          display: node.isLastRow ? "none" : "block",
+        }}
         onClick={() => handleClickOnRoute("bottom")}
         className={"route_bottom" + " " + getClassModifierBottomRoute()}
       ></div>

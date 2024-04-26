@@ -6,10 +6,11 @@ export enum SvgIcons {
   skipendfill,
 }
 interface SVGCompProps {
-  icon: SvgIcons;
+  icon: SvgIcons | null;
 }
 
 export default function SVGComp(props: SVGCompProps) {
+  if (props.icon === null) return null;
   const SVGTable = new Map<SvgIcons, JSX.Element>([
     [
       SvgIcons.start,

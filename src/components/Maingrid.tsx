@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
-import { NodeInterface, PathPointType } from "./PathFindingVisualizer";
+import { DragData, NodeInterface } from "./PathFindingVisualizer";
 import { MemoizedNode } from "./Node";
-import { Point } from "../algorithms/common-func";
 
 interface MaingridProps {
   nodes: NodeInterface[][];
-  clickOnNode: (nodeInfo: [number, number, number], drag: boolean) => void;
   clickOnRoute: (nodeInfo: [number, number, number], dir: string) => void;
-  dropOnNode: () => void;
   setNodeType: Function;
-  setDragData: (on: boolean, type: PathPointType | null) => void;
-  isDraggingNode: boolean;
-  dragData: PathPointType | null;
-  mouseLeaveMainGrid: (event: React.MouseEvent<HTMLDivElement>) => void;
+  setDragData: (data: DragData | null) => void;
+  isDraggingWall: boolean;
+  dragData: DragData | null;
+  cancelDrag: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function Maingrid(props: MaingridProps) {
@@ -24,7 +21,7 @@ export default function Maingrid(props: MaingridProps) {
 
   return (
     <>
-      <div onMouseLeave={props.mouseLeaveMainGrid} key={"maingrid"} id="maingrid" className="">
+      <div onMouseLeave={props.cancelDrag} onMouseUp={props.cancelDrag} key={"maingrid"} id="maingrid" className="">
         {nodes.map((nodeRow, rowIndex) => {
           return (
             <div key={rowIndex} className="gridrow">
@@ -40,10 +37,8 @@ export default function Maingrid(props: MaingridProps) {
                     depthProp={node.depth}
                     isTestOnProp={node.isTestOnProp}
                     weight={node.weight}
-                    clickOnNode={props.clickOnNode}
                     setNodeType={props.setNodeType}
                     clickOnRoute={props.clickOnRoute}
-                    dropOnNode={props.dropOnNode}
                     setDragData={props.setDragData}
                     isLastRow={node.isLastRow}
                     isLastCol={node.isLastCol}
@@ -53,7 +48,7 @@ export default function Maingrid(props: MaingridProps) {
                     isBottomRoutePathProp={node.isBottomRoutePath}
                     toAnimateProp={node.toAnimate}
                     dragData={props.dragData}
-                    isDraggingNode={props.isDraggingNode}
+                    isDraggingWall={props.isDraggingWall}
                   />
                 );
               })}

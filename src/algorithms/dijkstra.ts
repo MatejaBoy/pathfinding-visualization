@@ -72,7 +72,9 @@ export default class Dijkstra {
           }
 
           if (nodes[element.y][element.x].type !== PathPointType.Finish)
-            nodes[element.y][element.x].type = PathPointType.RouteNode;
+            //nodes[element.y][element.x].type = PathPointType.RouteNode;
+            nodes[element.y][element.x].isTestOnProp = true;
+
           setstate();
           currentNode = nodes[prev_y][prev_x];
         }

@@ -4,7 +4,6 @@ import DepthFirstSearch from "../algorithms/depth-first.ts";
 import Navbar from "./Navbar.tsx";
 import SliderComponent from "./Slider.tsx";
 import Dijkstra from "../algorithms/dijkstra.ts";
-import ButtonRow from "./Buttonrow.tsx";
 import Maingrid from "./Maingrid.tsx";
 import Infocontainer from "./Infocontainer.tsx";
 import CommonFuncs, { Point } from "../algorithms/common-func.ts";
@@ -29,17 +28,28 @@ export interface NodeInterface {
   toAnimate: boolean;
 }
 
+export interface SearchResults {
+  visitedNodes: NodeInterface[];
+  routeNodes: NodeInterface[];
+}
+
+export interface DragData {
+  nodetype: PathPointType;
+  prevNode: Point;
+}
+
 interface PathFindingVisualizerState {
-  nodes: NodeInterface[][];
-  isSolving: boolean;
-  startNode?: { x: number; y: number };
-  finishNode?: { x: number; y: number };
+  // nodes: NodeInterface[][];
+  // startNode?: { x: number; y: number };
+  // finishNode?: { x: number; y: number };
   isSHeld: boolean;
   isFHeld: boolean;
   solvespeed: number;
   currentAlgorithm: Algorithms;
-  isDraggingNode: boolean;
-  dragData: PathPointType | null;
+  isDraggingWall: boolean;
+  dragData: DragData | null;
+  isVisualizing: boolean;
+  hasVisFound: boolean;
 }
 
 export enum PathPointType {
@@ -58,22 +68,37 @@ export enum Algorithms {
   AS,
 }
 
+export enum ResetType {
+  resetgrid,
+  cleargrid,
+  clearsolution,
+}
+
 class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
-  gridsize: { x: number; y: number } = { x: 16, y: 10 };
+  gridsize: { x: number; y: number } = { x: 16, y: 11 };
   defaultSpeed: number = 90;
+  defaultStartNode: Point = { x: 1, y: 5 };
+  defaultFinishNode: Point = { x: 14, y: 5 };
+  nodes: NodeInterface[][] = [];
+  startNode?: Point = undefined;
+  finishNode?: Point = undefined;
+  isSolving: boolean = false;
+
   constructor(props: any) {
     super(props);
     this.state = {
-      nodes: [],
-      isSolving: false,
-      startNode: undefined,
-      finishNode: undefined,
+      //nodes: [],
+
+      // startNode: undefined,
+      // finishNode: undefined,
       isSHeld: false,
       isFHeld: false,
       solvespeed: 1,
       currentAlgorithm: Algorithms.BFS,
-      isDraggingNode: false,
+      isDraggingWall: false,
       dragData: null,
+      isVisualizing: false,
+      hasVisFound: false,
     };
   }
 
@@ -84,46 +109,21 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     Astar.setSolverSpeed(speed);
   };
 
-  getRandomInt(max: number): number {
-    return Math.floor(Math.random() * max);
-  }
-
-  setStartNode = () => {
-    if (this.state.startNode != undefined) {
-      this.state.nodes[this.state.startNode.y][this.state.startNode.x].type = PathPointType.Normal;
-    }
-    const randomY = this.getRandomInt(this.gridsize.y - 1);
-    const randomX = this.getRandomInt(this.gridsize.x - 1);
-
-    this.state.nodes[randomY][randomX].type = PathPointType.Start;
-    //this.state.nodes[7][0].type = PathPointType.Start;
-    this.setState({
-      startNode: { x: randomX, y: randomY },
-      //startNode: { x: 0, y: 7 },
-    });
-  };
-
   customSetState = () => {
     this.setState({});
   };
-  setFinishNode = () => {
-    if (this.state.finishNode != undefined) {
-      this.state.nodes[this.state.finishNode.y][this.state.finishNode.x].type = PathPointType.Normal;
-    }
-    const randomY = this.getRandomInt(this.gridsize.y);
-    const randomX = this.getRandomInt(this.gridsize.x);
 
-    this.state.nodes[randomY][randomX].type = PathPointType.Finish;
-    //this.state.nodes[55][55].type = PathPointType.Finish;
-    this.setState({
-      finishNode: { x: randomX, y: randomY },
-      //finishNode: { x: 55, y: 55 },
-    });
+  clearAndRestartSolve = () => {
+    this.resetSearch(ResetType.clearsolution);
+    console.log(this.startNode);
+    this.startSolving();
   };
-
-  startSolving = () => {
-    if (this.state.startNode === undefined || this.state.finishNode === undefined) return;
-    this.setState({ isSolving: true });
+  startSolving = async () => {
+    if (this.startNode === undefined || this.finishNode === undefined) {
+      return;
+    }
+    //this.setState({ isSolving: true });
+    console.log("solving starts");
 
     type searchParams = [
       nodes: NodeInterface[][],
@@ -131,20 +131,22 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       setstate: Function,
       defaultSpeed: number
     ];
-
-    const searchArgs: searchParams = [this.state.nodes, this.state.startNode!, this.customSetState, this.defaultSpeed];
-    if (this.state.currentAlgorithm === Algorithms.BFS) BreadthFirstSearch.startBreadthFirstSearch(...searchArgs);
-    else if (this.state.currentAlgorithm === Algorithms.DFS)
+    let results: SearchResults | null = { visitedNodes: [], routeNodes: [] };
+    const searchArgs: searchParams = [this.nodes, this.startNode!, this.customSetState, this.defaultSpeed];
+    if (this.state.currentAlgorithm === Algorithms.BFS) {
+      results = await BreadthFirstSearch.startBreadthFirstSearch(...searchArgs);
+      if (results === null) return;
+      CommonFuncs.visualizeResults(results, this.customSetState);
+    } else if (this.state.currentAlgorithm === Algorithms.DFS)
       DepthFirstSearch.startDepthFirstSearch(...searchArgs, false);
     else if (this.state.currentAlgorithm === Algorithms.IDDFS)
       DepthFirstSearch.startDepthFirstSearch(...searchArgs, true);
     else if (this.state.currentAlgorithm === Algorithms.WD) Dijkstra.startDijkstraSearch(...searchArgs);
-    else if (this.state.currentAlgorithm === Algorithms.AS)
-      Astar.startAstarSearch(...searchArgs, this.state.finishNode);
+    else if (this.state.currentAlgorithm === Algorithms.AS) Astar.startAstarSearch(...searchArgs, this.finishNode);
   };
 
   stopSolving = () => {
-    this.setState({ isSolving: false });
+    this.isSolving = false;
     Dijkstra.setSolving(false);
     DepthFirstSearch.stopSolving();
     BreadthFirstSearch.stopSolving();
@@ -152,30 +154,15 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   };
 
   setAlgorithm = (alg: Algorithms) => {
-    this.setState({ currentAlgorithm: alg });
-    this.resetSearch();
-  };
-
-  handleClickOnNode = (nodeInfo: [number, number, number], drag: boolean) => {
-    if (this.state.isSolving) return;
-    const currentNode = this.state.nodes[nodeInfo[2]][nodeInfo[1]];
-    if (currentNode.type === PathPointType.Start) return;
-    if (currentNode.type === PathPointType.Finish) return;
-
-    if (currentNode.type === PathPointType.Normal) {
-      currentNode.type = PathPointType.Wall;
-      this.setState({});
-    } else if (!drag && currentNode.type === PathPointType.Wall) {
-      currentNode.type = PathPointType.Normal;
-      this.setState({});
-    }
+    this.setState({ currentAlgorithm: alg }, () => {});
+    this.resetSearch(ResetType.clearsolution);
   };
 
   handleClickOnRoute = (nodeInfo: [number, number, number], dir: string) => {
     console.log("Click on route");
-    if (this.state.isSolving) return;
+    if (this.isSolving) return;
     if (this.state.currentAlgorithm !== Algorithms.WD && this.state.currentAlgorithm !== Algorithms.AS) return;
-    const currentNode = this.state.nodes[nodeInfo[2]][nodeInfo[1]];
+    const currentNode = this.nodes[nodeInfo[2]][nodeInfo[1]];
 
     if (dir === "right") {
       if (currentNode.rightRouteWeight < 5) currentNode.rightRouteWeight++;
@@ -189,31 +176,31 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     }
   };
 
-  handleDropOnNode = () => {
-    if (this.state.isSolving) return;
-  };
-
   setPointType = (nodeInfo: Point, type: PathPointType, prevType: PathPointType) => {
-    if (this.state.isSolving) return;
-    this.state.nodes[nodeInfo.y][nodeInfo.x].type = type;
+    if (this.isSolving) return;
+    const currentNode = this.nodes[nodeInfo.y][nodeInfo.x];
+    currentNode.type = type;
     if (type === PathPointType.Normal) {
-      if (prevType === PathPointType.Start) this.setState({ startNode: undefined });
-      if (prevType === PathPointType.Finish) this.setState({ finishNode: undefined });
+      if (prevType === PathPointType.Start) this.startNode = undefined;
+      if (prevType === PathPointType.Finish) this.finishNode = undefined;
+      // if (prevType === PathPointType.Start) this.setState({ startNode: undefined });
+      // if (prevType === PathPointType.Finish) this.setState({ finishNode: undefined });
     } else if (type === PathPointType.Start) {
-      this.setState({ startNode: nodeInfo });
-    } else if ((type = PathPointType.Finish)) {
-      this.setState({ finishNode: nodeInfo });
-    } else {
-      this.setState({});
+      console.log("runs");
+      this.startNode = nodeInfo;
+      this.clearAndRestartSolve();
+    } else if (type === PathPointType.Finish) {
+      this.finishNode = nodeInfo;
+    } else if (type === PathPointType.Wall) {
     }
+    this.setState({});
   };
 
-  setDragData = (on: boolean, type: PathPointType | null) => {
-    console.log("Set drag: " + on);
-    console.log("Drag type: " + type);
+  setDragData = (data: DragData | null) => {
+    //console.log("Set drag: ");
+    //console.log(data);
     this.setState({
-      isDraggingNode: on,
-      dragData: type,
+      dragData: data,
     });
   };
 
@@ -227,16 +214,26 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     let current_id = 0;
     for (let row = 0; row < this.gridsize.y; row++) {
       for (let col = 0; col < this.gridsize.x; col++) {
+        let nodeType = PathPointType.Normal;
+        if (col === this.defaultStartNode.x && row === this.defaultStartNode.y) {
+          nodeType = PathPointType.Start;
+          //this.setState({ startNode: { x: col, y: row } });
+          this.startNode = { x: col, y: row };
+        } else if (col === this.defaultFinishNode.x && row === this.defaultFinishNode.y) {
+          nodeType = PathPointType.Finish;
+          this.finishNode = { x: col, y: row };
+          // this.setState({ finishNode: { x: col, y: row } });
+        } else nodeType = PathPointType.Normal;
         let currentNode: NodeInterface = {
           id: current_id,
           x: col,
           y: row,
-          type: PathPointType.Normal,
+          type: nodeType,
           visited: false,
           depth: 0,
           isAddedToQue: false,
           isTestOnProp: false,
-          weight: this.getRandomInt(20),
+          weight: CommonFuncs.getRandomInt(20),
           isLastRow: row < this.gridsize.y - 1 ? false : true,
           isLastCol: col < this.gridsize.x - 1 ? false : true,
           rightRouteWeight: 1,
@@ -251,48 +248,72 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       node_list.push(node_rows);
       node_rows = [];
     }
-    this.setState({ nodes: node_list });
+    //this.setState({ nodes: node_list });
+    this.nodes = node_list;
+    this.setState({});
   }
 
-  setOneToVisited = () => {
-    this.state.nodes[5][5].visited = true;
-    this.setState({});
-  };
-
-  resetSearch = async () => {
+  resetSearch = async (type: ResetType) => {
     this.stopSolving();
-    await CommonFuncs.timeout(100);
-    for (let i = 0; i < this.state.nodes.length; i++) {
-      for (let j = 0; j < this.state.nodes[i].length; j++) {
-        const n = this.state.nodes[i][j];
+    for (let i = 0; i < this.nodes.length; i++) {
+      for (let j = 0; j < this.nodes[i].length; j++) {
+        const n = this.nodes[i][j];
+        n.isRightRoutePath = false;
+        n.isBottomRoutePath = false;
         n.isAddedToQue = false;
         n.isTestOnProp = false;
         n.visited = false;
         n.depth = 0;
-        n.type = PathPointType.Normal;
+        n.toAnimate = false;
+
+        if (type === ResetType.clearsolution) {
+          continue;
+        } else if (type === ResetType.resetgrid) {
+          n.type = PathPointType.Normal;
+        } else if (type === ResetType.cleargrid) {
+          n.type = n.type === (PathPointType.Wall || PathPointType.RouteNode) ? PathPointType.Normal : n.type;
+        }
         n.rightRouteWeight = 1;
         n.bottomRouteWeight = 1;
-        n.isBottomRoutePath = false;
-        n.isRightRoutePath = false;
-        n.toAnimate = false;
       }
     }
 
-    this.setState({ startNode: undefined, finishNode: undefined, isSolving: false });
+    // this.isSolving = false;
+
+    // this.setState({ startNode: undefined, finishNode: undefined, isSolving: false });
+    if (type === ResetType.resetgrid) {
+      this.setPointType(this.defaultStartNode, PathPointType.Start, PathPointType.Normal);
+      this.setPointType(this.defaultFinishNode, PathPointType.Finish, PathPointType.Normal);
+      this.startNode = this.defaultStartNode;
+      this.finishNode = this.defaultFinishNode;
+    }
   };
 
   getMainClassName = () => {
-    if (this.state.isDraggingNode) {
-      return "dragging _" + this.state.dragData;
+    if (this.state.dragData !== null) {
+      return "dragging _" + this.state.dragData.nodetype;
     } else {
       return "";
     }
   };
 
-  handleMouseLeaveMainGrid = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!this.state.isDraggingNode) return;
-    console.log("leaving maingrid");
-    this.setDragData(false, null);
+  cancelDragging = () => {
+    if (this.state.dragData === null) return;
+    /*this.setPointType(
+      { x: this.state.dragData.prevNode.x, y: this.state.dragData.prevNode.y },
+      this.state.dragData.nodetype,
+      PathPointType.Normal
+    );*/
+    this.setDragData(null);
+  };
+
+  setIsVisualizing = (isVis: boolean) => {
+    console.log(this.state.isVisualizing);
+    this.setState({ isVisualizing: isVis }, () => {
+      if (!this.state.hasVisFound) {
+        this.startSolving();
+      }
+    });
   };
 
   render() {
@@ -300,11 +321,11 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       <div className={this.getMainClassName()}>
         <Navbar
           setAlg={this.setAlgorithm}
-          setStartNode={this.setStartNode}
-          setFinishNode={this.setFinishNode}
           resetSearch={this.resetSearch}
           startSolving={this.startSolving}
           stopSolving={this.stopSolving}
+          isVisualizing={this.state.isVisualizing}
+          setIsVisualizing={this.setIsVisualizing}
         />
         <div id="mainbody">
           <div className="main-col-1">
@@ -312,15 +333,13 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           </div>
           <div className="main-col-2">
             <Maingrid
-              nodes={this.state.nodes}
-              clickOnNode={this.handleClickOnNode}
+              nodes={this.nodes}
               clickOnRoute={this.handleClickOnRoute}
-              dropOnNode={this.handleDropOnNode}
               setNodeType={this.setPointType}
               setDragData={this.setDragData}
               dragData={this.state.dragData}
-              isDraggingNode={this.state.isDraggingNode}
-              mouseLeaveMainGrid={this.handleMouseLeaveMainGrid}
+              isDraggingWall={this.state.isDraggingWall}
+              cancelDrag={this.cancelDragging}
             />
           </div>
           <div className="main-col-3">
