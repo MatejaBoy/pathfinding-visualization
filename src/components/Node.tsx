@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../App.tsx";
 import "./style.css";
 import { DragData, PathPointType } from "./PathFindingVisualizer.tsx";
+import CommonFuncs from "../algorithms/common-func.ts";
 
 interface NodeProps {
   id: number;
@@ -79,11 +80,12 @@ export default function Node(node: NodeProps) {
 
   // Handling dragging the mouse over a Node
   // -- calling clickOnNode with drag=true --
-  function onMouseMouseOver(e: React.MouseEvent) {
+  async function onMouseMouseOver(e: React.MouseEvent) {
     if (node.dragData !== null) {
-      console.log("dragdata");
-      console.log(node.dragData);
-      node.setNodeType({ x: node.dragData.prevNode.x, y: node.dragData.prevNode.y }, PathPointType.Normal);
+      // console.log("dragdata");
+      //console.log(node.dragData.prevNode);
+
+      //node.setNodeType({ x: node.dragData.prevNode.x, y: node.dragData.prevNode.y }, PathPointType.Normal);
       node.setNodeType({ x: node.x, y: node.y }, node.dragData!.nodetype);
       node.setDragData({ nodetype: node.dragData.nodetype, prevNode: { x: node.x, y: node.y } });
       return;
@@ -95,7 +97,7 @@ export default function Node(node: NodeProps) {
   }
 
   function onMouseDown() {
-    console.log("onMouseDown");
+    // console.log("onMouseDown");
     if (nodeType === PathPointType.Start || nodeType === PathPointType.Finish) {
       shouldStartDrag = true;
     }

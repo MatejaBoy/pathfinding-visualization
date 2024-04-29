@@ -14,7 +14,6 @@ function Navbar(props: NavbarProps) {
   const [isVisualizing, setIsVisualizing] = useState(props.isVisualizing);
 
   useEffect(() => {
-    console.log("useffe");
     setIsVisualizing(props.isVisualizing);
   }, [props.isVisualizing]);
 

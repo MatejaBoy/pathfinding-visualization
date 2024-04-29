@@ -40,22 +40,22 @@ export default class BreadthFirstSearch {
   }
 
   static setSolverSpeed(percent: number) {
-    console.log("Percent: " + percent);
+    //console.log("Percent: " + percent);
     solverTimeout = CommonFuncs.mapFromRangeToRange(
       percent,
       { min: 10, max: 100 },
       { min: maxTimeout, max: minTimeout }
     );
-    console.log("Solver timeout: " + solverTimeout);
+    //console.log("Solver timeout: " + solverTimeout);
   }
 
   static async bfsBackTrack(checkNode: NodeInterface, nodes: NodeInterface[][], setstate: Function): Promise<boolean> {
     if (!this.isSolving) return false;
 
     if (checkNode.type === PathPointType.Start) {
-      console.log("BFS has finished, starting visualization");
+      //console.log("BFS has finished, starting visualization");
       stopTimePerf = performance.now();
-      console.log("Time it took to run the find the route with perf: " + (stopTimePerf - startTimePerf));
+      // console.log("Time it took to run the find the route with perf: " + (stopTimePerf - startTimePerf));
       //this.visualizeBFS(setstate);
       return true;
     }
@@ -70,7 +70,7 @@ export default class BreadthFirstSearch {
 
     currentBestNode.isTestOnProp = true;
     currentBestNode.toAnimate = true;
-    setstate();
+    //setstate();
 
     // await CommonFuncs.timeout(5000);
     if (nodes[checkNode.y][checkNode.x].type != PathPointType.Start) routeNodes.push(currentBestNode);
@@ -87,14 +87,14 @@ export default class BreadthFirstSearch {
 
     const currentNode = nodes[startPoint.y][startPoint.x];
     if (currentNode.type === PathPointType.Finish) {
-      console.log("Finish node found, calling backtrack");
+      //("Finish node found, calling backtrack");
       return currentNode;
     }
 
     if (currentNode.type === PathPointType.Start) {
       queue.push(currentNode);
       startTimePerf = performance.now();
-      console.log("breadth_first_search_running");
+      //console.log("breadth_first_search_running");
     }
 
     currentNode.visited = true;
@@ -112,7 +112,7 @@ export default class BreadthFirstSearch {
     queue.shift();
 
     if (queue[0] === undefined || queue === null) {
-      console.log("There's no route to the finish node :(");
+      //console.log("There's no route to the finish node :(");
       return null;
     }
 

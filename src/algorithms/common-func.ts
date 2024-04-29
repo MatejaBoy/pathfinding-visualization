@@ -30,7 +30,7 @@ export default class CommonFuncs extends Component<{}, {}> {
     for (const node of results.visitedNodes) {
       //await CommonFuncs.timeout(25);
       node.toAnimate = true;
-      setstate();
+      //setstate();
     }
 
     results.routeNodes.reverse();
@@ -39,7 +39,9 @@ export default class CommonFuncs extends Component<{}, {}> {
       //await CommonFuncs.timeout(25);
       node.isTestOnProp = true;
       node.toAnimate = true;
-      setstate();
+      //setstate();
     }
+
+    setstate();
   }
 }
