@@ -1,88 +1,70 @@
 import { NodeInterface, PathPointType, SearchResults } from "../components/PathFindingVisualizer";
-import CommonFuncs from "./common-func";
-
-let queue: NodeInterface[] = [];
-let routeNodes: NodeInterface[] = [];
-let visitedNodes: NodeInterface[] = [];
-
-let maxTimeout = 1000;
-let minTimeout = 10;
-let solverTimeout: number;
-let startTimePerf = 0;
-let stopTimePerf = 0;
-let nodes: NodeInterface[][] = [];
+import CommonFuncs, { Point } from "./common-func";
 
 export default class BreadthFirstSearch {
-  static isSolving = false;
+  isSolving = false;
+  queue: NodeInterface[] = [];
+  routeNodes: NodeInterface[] = [];
+  visitedNodes: NodeInterface[] = [];
+  startPoint: Point = { x: 0, y: 0 };
 
-  static async startBreadthFirstSearch(
-    input_nodes: NodeInterface[][],
-    startPoint: { x: number; y: number },
-    setstate: Function,
-    defaultSpeed: number
-  ): Promise<SearchResults | null> {
-    nodes = Array.from(input_nodes);
-    queue = [];
-    routeNodes = [];
-    visitedNodes = [];
+  maxTimeout = 1000;
+  minTimeout = 10;
+  solverTimeout = 0;
+  startTimePerf = 0;
+  stopTimePerf = 0;
+  nodes: NodeInterface[][] = [];
+
+  async startBreadthFirstSearch(input_nodes: NodeInterface[][], startPoint: Point): Promise<SearchResults | null> {
+    this.nodes = Array.from(input_nodes);
+    this.queue = [];
+    this.routeNodes = [];
+    this.visitedNodes = [];
     this.isSolving = true;
-    let found = await this.breadthFirstSearch(nodes, startPoint, setstate);
+    this.startPoint = JSON.parse(JSON.stringify(startPoint));
+    let found = await this.breadthFirstSearch(this.nodes, startPoint);
     if (found === null) return null;
-    let go = await BreadthFirstSearch.bfsBackTrack(found!, nodes, setstate);
+    let go = await this.bfsBackTrack(found!, this.nodes);
     if (!go) return null;
-    return { visitedNodes: visitedNodes, routeNodes: routeNodes };
-
-    //this.visualizeBFS(setstate);
+    return { visitedNodes: this.visitedNodes, routeNodes: this.routeNodes };
   }
 
-  static stopSolving() {
+  stopSolving() {
     this.isSolving = false;
   }
 
-  static setSolverSpeed(percent: number) {
-    //console.log("Percent: " + percent);
-    solverTimeout = CommonFuncs.mapFromRangeToRange(
+  setSolverSpeed(percent: number) {
+    this.solverTimeout = CommonFuncs.mapFromRangeToRange(
       percent,
       { min: 10, max: 100 },
-      { min: maxTimeout, max: minTimeout }
+      { min: this.maxTimeout, max: this.minTimeout }
     );
-    //console.log("Solver timeout: " + solverTimeout);
   }
 
-  static async bfsBackTrack(checkNode: NodeInterface, nodes: NodeInterface[][], setstate: Function): Promise<boolean> {
+  async bfsBackTrack(checkNode: NodeInterface, nodes: NodeInterface[][]): Promise<boolean> {
     if (!this.isSolving) return false;
 
-    if (checkNode.type === PathPointType.Start) {
-      //console.log("BFS has finished, starting visualization");
-      stopTimePerf = performance.now();
-      // console.log("Time it took to run the find the route with perf: " + (stopTimePerf - startTimePerf));
-      //this.visualizeBFS(setstate);
+    if (checkNode.x === this.startPoint.x && checkNode.y === this.startPoint.y) {
+      this.stopTimePerf = performance.now();
+      // console.log("BFS has finished, starting visualization");
+      // console.log("Time it took to run the find the route with perf: " + (this.stopTimePerf - this.startTimePerf));
       return true;
     }
 
-    let adjacents = BreadthFirstSearch.findAdjacentsBacktrack(visitedNodes, checkNode);
+    let adjacents = BreadthFirstSearch.findAdjacentsBacktrack(this.visitedNodes, checkNode);
     let currentBestNode = adjacents[0];
     for (let i = 0; i < adjacents.length; i++) {
       if (adjacents[i].depth < currentBestNode.depth) {
         currentBestNode = adjacents[i];
       }
     }
+    //if (checkNode.x !== this.startPoint.x && checkNode.y !== this.startPoint.y) this.routeNodes.push(currentBestNode);
+    if (true) this.routeNodes.push(currentBestNode);
 
-    currentBestNode.isTestOnProp = true;
-    currentBestNode.toAnimate = true;
-    //setstate();
-
-    // await CommonFuncs.timeout(5000);
-    if (nodes[checkNode.y][checkNode.x].type != PathPointType.Start) routeNodes.push(currentBestNode);
-
-    return BreadthFirstSearch.bfsBackTrack(currentBestNode, nodes, setstate);
+    return this.bfsBackTrack(currentBestNode, nodes);
   }
 
-  static async breadthFirstSearch(
-    nodes: NodeInterface[][],
-    startPoint: { x: number; y: number },
-    setstate: Function
-  ): Promise<NodeInterface | null> {
+  async breadthFirstSearch(nodes: NodeInterface[][], startPoint: Point): Promise<NodeInterface | null> {
     if (!this.isSolving) return null;
 
     const currentNode = nodes[startPoint.y][startPoint.x];
@@ -92,13 +74,13 @@ export default class BreadthFirstSearch {
     }
 
     if (currentNode.type === PathPointType.Start) {
-      queue.push(currentNode);
-      startTimePerf = performance.now();
+      this.queue.push(currentNode);
+      this.startTimePerf = performance.now();
       //console.log("breadth_first_search_running");
     }
 
     currentNode.visited = true;
-    visitedNodes.push(currentNode);
+    this.visitedNodes.push(currentNode);
 
     const adjacents = BreadthFirstSearch.findAdjacents(nodes, startPoint.x, startPoint.y);
 
@@ -106,17 +88,17 @@ export default class BreadthFirstSearch {
       if (adjacent.type != PathPointType.Wall && !adjacent.visited && !adjacent.isAddedToQue) {
         adjacent.isAddedToQue = true;
         adjacent.depth = currentNode.depth + 1;
-        queue.push(adjacent);
+        this.queue.push(adjacent);
       }
     }
-    queue.shift();
+    this.queue.shift();
 
-    if (queue[0] === undefined || queue === null) {
+    if (this.queue[0] === undefined || this.queue === null) {
       //console.log("There's no route to the finish node :(");
       return null;
     }
 
-    return BreadthFirstSearch.breadthFirstSearch(nodes, { x: queue[0].x, y: queue[0].y }, setstate);
+    return this.breadthFirstSearch(nodes, { x: this.queue[0].x, y: this.queue[0].y });
   }
 
   static findAdjacents(nodes: NodeInterface[][], base_x: number, base_y: number) {

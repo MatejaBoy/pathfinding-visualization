@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "../App.tsx";
 import "./style.css";
 import { DragData, PathPointType } from "./PathFindingVisualizer.tsx";
-import CommonFuncs from "../algorithms/common-func.ts";
 
 interface NodeProps {
   id: number;
@@ -36,11 +35,6 @@ export default function Node(node: NodeProps) {
   const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
   const [toAnimate, setToAnimate] = useState(node.toAnimateProp);
   const [isVisited, setIsVisited] = useState(node.isVisitedProp);
-  //const [depth, setDepth] = useState(node.depthProp);
-  // const [isDragging, setIsDragging] = useState(false);
-  // const [isScaleAnim, setIsScaleAnim] = useState(false);
-
-  let shouldStartDrag = false;
 
   useEffect(() => {
     setToAnimate(node.toAnimateProp);
@@ -53,10 +47,6 @@ export default function Node(node: NodeProps) {
   useEffect(() => {
     setIsVisited(node.isVisitedProp);
   }, [node.isVisitedProp]);
-
-  /* useEffect(() => {
-    setDepth(node.depthProp);
-  }, [node.depthProp]);*/
 
   useEffect(() => {
     setIsTest(node.isTestOnProp);
@@ -81,11 +71,8 @@ export default function Node(node: NodeProps) {
   // Handling dragging the mouse over a Node
   // -- calling clickOnNode with drag=true --
   async function onMouseMouseOver(e: React.MouseEvent) {
-    if (node.dragData !== null) {
-      // console.log("dragdata");
-      //console.log(node.dragData.prevNode);
-
-      //node.setNodeType({ x: node.dragData.prevNode.x, y: node.dragData.prevNode.y }, PathPointType.Normal);
+    if (node.dragData !== null && e.buttons) {
+      if (nodeType === node.dragData.nodetype) return;
       node.setNodeType({ x: node.x, y: node.y }, node.dragData!.nodetype);
       node.setDragData({ nodetype: node.dragData.nodetype, prevNode: { x: node.x, y: node.y } });
       return;
@@ -97,14 +84,9 @@ export default function Node(node: NodeProps) {
   }
 
   function onMouseDown() {
-    // console.log("onMouseDown");
-    if (nodeType === PathPointType.Start || nodeType === PathPointType.Finish) {
-      shouldStartDrag = true;
-    }
-    if (nodeType === PathPointType.Normal || nodeType === PathPointType.Wall) {
-      if (nodeType === PathPointType.Normal) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Wall);
-      if (nodeType === PathPointType.Wall) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal);
-    }
+    if (nodeType === PathPointType.Start || nodeType === PathPointType.Finish) return;
+    if (nodeType === PathPointType.Normal) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Wall);
+    if (nodeType === PathPointType.Wall) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal);
   }
 
   function handleClickOnRoute(dir: string) {
@@ -113,12 +95,7 @@ export default function Node(node: NodeProps) {
 
   function onMouseLeave(event: React.MouseEvent<HTMLDivElement>) {
     if (nodeType !== PathPointType.Start && nodeType != PathPointType.Finish) return;
-
-    if (event.buttons && shouldStartDrag) {
-      node.setDragData({ nodetype: nodeType, prevNode: { x: node.x, y: node.y } });
-      node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal, nodeType);
-      shouldStartDrag = false;
-    }
+    if (event.buttons) node.setDragData({ nodetype: nodeType, prevNode: { x: node.x, y: node.y } });
   }
 
   function getVisitedModifier() {
@@ -149,8 +126,6 @@ export default function Node(node: NodeProps) {
         return "start";
       case PathPointType.Finish:
         return "finish";
-      case PathPointType.RouteNode:
-        return "routenode";
     }
   }
 

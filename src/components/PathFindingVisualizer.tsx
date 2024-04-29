@@ -8,6 +8,7 @@ import Maingrid from "./Maingrid.tsx";
 import Infocontainer from "./Infocontainer.tsx";
 import CommonFuncs, { Point } from "../algorithms/common-func.ts";
 import Astar from "../algorithms/Astar.ts";
+import PFVisualizer from "../algorithms/visualizer.ts";
 
 export interface NodeInterface {
   id: number;
@@ -48,7 +49,7 @@ interface PathFindingVisualizerState {
   currentAlgorithm: Algorithms;
   isDraggingWall: boolean;
   dragData: DragData | null;
-  isVisualizing: boolean;
+  isVisualizingState: boolean;
   hasVisFound: boolean;
 }
 
@@ -76,37 +77,36 @@ export enum ResetType {
 
 class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   gridsize: { x: number; y: number } = { x: 16, y: 11 };
-  defaultSpeed: number = 90;
+  defaultSpeed: number = 100;
+  currentSpeed: number = 100;
   defaultStartNode: Point = { x: 1, y: 5 };
   defaultFinishNode: Point = { x: 14, y: 5 };
   nodes: NodeInterface[][] = [];
   startNode?: Point = undefined;
   finishNode?: Point = undefined;
   isSolving: boolean = false;
+  search: any = null;
+  visualizer: any = null;
+  isVisualizing: boolean = false;
+  needTimeout: boolean = true;
 
   constructor(props: any) {
     super(props);
     this.state = {
-      //nodes: [],
-
-      // startNode: undefined,
-      // finishNode: undefined,
       isSHeld: false,
       isFHeld: false,
       solvespeed: 1,
       currentAlgorithm: Algorithms.BFS,
       isDraggingWall: false,
       dragData: null,
-      isVisualizing: false,
+      isVisualizingState: false,
       hasVisFound: false,
     };
   }
 
   setSpeed = (speed: number) => {
-    DepthFirstSearch.setSolverSpeed(speed);
-    BreadthFirstSearch.setSolverSpeed(speed);
-    Dijkstra.setSolverSpeed(speed);
-    Astar.setSolverSpeed(speed);
+    this.currentSpeed = speed;
+    if (this.visualizer !== null) this.visualizer.setSolverSpeed(speed);
   };
 
   customSetState = () => {
@@ -114,16 +114,13 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   };
 
   clearAndRestartSolve = () => {
-    this.resetSearch(ResetType.clearsolution);
-    //console.log(this.startNode);
+    this.resetSearch(ResetType.clearsolution, false);
     this.startSolving();
   };
   startSolving = async () => {
     if (this.startNode === undefined || this.finishNode === undefined) {
       return;
     }
-    //this.setState({ isSolving: true });
-    // console.log("solving starts");
 
     type searchParams = [
       nodes: NodeInterface[][],
@@ -131,12 +128,18 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       setstate: Function,
       defaultSpeed: number
     ];
-    let results: SearchResults | null = { visitedNodes: [], routeNodes: [] };
     const searchArgs: searchParams = [this.nodes, this.startNode!, this.customSetState, this.defaultSpeed];
+
     if (this.state.currentAlgorithm === Algorithms.BFS) {
-      results = await BreadthFirstSearch.startBreadthFirstSearch(...searchArgs);
+      if (this.search !== null) this.search.stopSolving();
+      this.search = null;
+      this.search = new BreadthFirstSearch();
+      let results = await this.search.startBreadthFirstSearch(...searchArgs);
       if (results === null) return;
-      CommonFuncs.visualizeResults(results, this.customSetState);
+      if (this.visualizer !== null) this.visualizer.stopVisualize();
+      this.visualizer = null;
+      this.visualizer = new PFVisualizer();
+      await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true);
     } else if (this.state.currentAlgorithm === Algorithms.DFS)
       DepthFirstSearch.startDepthFirstSearch(...searchArgs, false);
     else if (this.state.currentAlgorithm === Algorithms.IDDFS)
@@ -149,13 +152,13 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     this.isSolving = false;
     Dijkstra.setSolving(false);
     DepthFirstSearch.stopSolving();
-    BreadthFirstSearch.stopSolving();
+    //BreadthFirstSearch.stopSolving();
     Astar.setSolving(false);
   };
 
   setAlgorithm = (alg: Algorithms) => {
     this.setState({ currentAlgorithm: alg }, () => {});
-    this.resetSearch(ResetType.clearsolution);
+    this.resetSearch(ResetType.clearsolution, true);
   };
 
   handleClickOnRoute = (nodeInfo: [number, number, number], dir: string) => {
@@ -178,18 +181,19 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   setPointType = (nodeInfo: Point, type: PathPointType, prevType: PathPointType) => {
     //if (this.isSolving) return;
-    // const currentNode = this.nodes[nodeInfo.y][nodeInfo.x];
-    this.nodes[nodeInfo.y][nodeInfo.x].type = type;
-    if (type === PathPointType.Normal) {
-      //if (prevType === PathPointType.Start) this.startNode = undefined;
-      //else if (prevType === PathPointType.Finish) this.finishNode = undefined;
-    } else if (type === PathPointType.Start) {
+
+    if (type === PathPointType.Start) {
       this.nodes[this.startNode!.y][this.startNode!.x].type = PathPointType.Normal;
       this.startNode = nodeInfo;
-      if (this.state.isVisualizing) this.clearAndRestartSolve();
+      this.nodes[nodeInfo.y][nodeInfo.x].type = type;
+      if (this.state.isVisualizingState && this.isVisualizing) this.clearAndRestartSolve();
     } else if (type === PathPointType.Finish) {
+      this.nodes[this.finishNode!.y][this.finishNode!.x].type = PathPointType.Normal;
       this.finishNode = nodeInfo;
+      this.nodes[nodeInfo.y][nodeInfo.x].type = type;
+      if (this.state.isVisualizingState && this.isVisualizing) this.clearAndRestartSolve();
     } else if (type === PathPointType.Wall) {
+      this.nodes[nodeInfo.y][nodeInfo.x].type = type;
     }
     this.setState({});
   };
@@ -251,8 +255,9 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     this.setState({});
   }
 
-  resetSearch = async (type: ResetType) => {
+  resetSearch = async (type: ResetType, resettimeout: boolean) => {
     this.stopSolving();
+    this.needTimeout = resettimeout;
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = 0; j < this.nodes[i].length; j++) {
         const n = this.nodes[i][j];
@@ -280,11 +285,12 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
     // this.setState({ startNode: undefined, finishNode: undefined, isSolving: false });
     if (type === ResetType.resetgrid) {
+      this.setState({ isVisualizingState: false });
+      this.isVisualizing = false;
       this.setPointType(this.defaultStartNode, PathPointType.Start, PathPointType.Normal);
       this.setPointType(this.defaultFinishNode, PathPointType.Finish, PathPointType.Normal);
-      this.startNode = this.defaultStartNode;
-      this.finishNode = this.defaultFinishNode;
     }
+    this.setState({});
   };
 
   getMainClassName = () => {
@@ -307,16 +313,12 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   setIsVisualizing = (isVis: boolean) => {
     // console.log(this.state.isVisualizing);
-    this.setState({ isVisualizing: isVis }, () => {
-      if (!this.state.hasVisFound) {
-        //this.startSolving();
+    this.isVisualizing = isVis;
+    this.setState({ isVisualizingState: isVis }, () => {
+      if (!this.state.hasVisFound && this.state.isVisualizingState) {
         this.clearAndRestartSolve();
       }
     });
-  };
-
-  test = () => {
-    this.setState({});
   };
 
   render() {
@@ -327,7 +329,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           resetSearch={this.resetSearch}
           startSolving={this.startSolving}
           stopSolving={this.stopSolving}
-          isVisualizing={this.state.isVisualizing}
+          isVisualizing={this.state.isVisualizingState}
           setIsVisualizing={this.setIsVisualizing}
         />
         <div id="mainbody">
@@ -344,7 +346,6 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
               isDraggingWall={this.state.isDraggingWall}
               cancelDrag={this.cancelDragging}
             />
-            <button onClick={this.test}></button>
           </div>
           <div className="main-col-3">
             <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />

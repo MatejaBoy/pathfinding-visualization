@@ -5,7 +5,7 @@ interface NavbarProps {
   setAlg: Function;
   startSolving: () => void;
   stopSolving: () => void;
-  resetSearch: (type: ResetType) => void;
+  resetSearch: (type: ResetType, resettimeout: boolean) => void;
   setIsVisualizing: (isVis: boolean) => void;
   isVisualizing: boolean;
 }
@@ -126,7 +126,7 @@ function Navbar(props: NavbarProps) {
                 className="nav-link active"
                 key={"resetButton"}
                 onClick={() => {
-                  props.resetSearch(ResetType.cleargrid);
+                  props.resetSearch(ResetType.cleargrid, true);
                 }}
               >
                 Clear Grid
@@ -138,7 +138,7 @@ function Navbar(props: NavbarProps) {
                 className="nav-link active"
                 key={"resetButton"}
                 onClick={() => {
-                  props.resetSearch(ResetType.clearsolution);
+                  props.resetSearch(ResetType.clearsolution, true);
                 }}
               >
                 Clear solution
@@ -150,7 +150,7 @@ function Navbar(props: NavbarProps) {
                 className="nav-link active"
                 key={"resetButton"}
                 onClick={() => {
-                  props.resetSearch(ResetType.resetgrid);
+                  props.resetSearch(ResetType.resetgrid, true);
                 }}
               >
                 Reset grid
