@@ -96,7 +96,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       isSHeld: false,
       isFHeld: false,
       solvespeed: 1,
-      currentAlgorithm: Algorithms.BFS,
+      currentAlgorithm: Algorithms.DFS,
       isDraggingWall: false,
       dragData: null,
       isVisualizingState: false,
@@ -122,38 +122,42 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       return;
     }
 
-    type searchParams = [
-      nodes: NodeInterface[][],
-      startPoint: { x: number; y: number },
-      setstate: Function,
-      defaultSpeed: number
-    ];
-    const searchArgs: searchParams = [this.nodes, this.startNode!, this.customSetState, this.defaultSpeed];
+    if (this.search !== null) this.search.stopSolving();
+    this.search = null;
+    if (this.visualizer !== null) this.visualizer.stopVisualize();
+    this.visualizer = null;
+
+    type searchParams = [nodes: NodeInterface[][], startPoint: { x: number; y: number }];
+    const searchArgs: searchParams = [this.nodes, this.startNode!];
 
     if (this.state.currentAlgorithm === Algorithms.BFS) {
-      if (this.search !== null) this.search.stopSolving();
-      this.search = null;
       this.search = new BreadthFirstSearch();
       let results = await this.search.startBreadthFirstSearch(...searchArgs);
       if (results === null) return;
-      if (this.visualizer !== null) this.visualizer.stopVisualize();
-      this.visualizer = null;
       this.visualizer = new PFVisualizer();
       await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true);
-    } else if (this.state.currentAlgorithm === Algorithms.DFS)
-      DepthFirstSearch.startDepthFirstSearch(...searchArgs, false);
-    else if (this.state.currentAlgorithm === Algorithms.IDDFS)
-      DepthFirstSearch.startDepthFirstSearch(...searchArgs, true);
-    else if (this.state.currentAlgorithm === Algorithms.WD) Dijkstra.startDijkstraSearch(...searchArgs);
-    else if (this.state.currentAlgorithm === Algorithms.AS) Astar.startAstarSearch(...searchArgs, this.finishNode);
+    } else if (this.state.currentAlgorithm === Algorithms.DFS) {
+      this.search = new DepthFirstSearch();
+      let results = await this.search.startDepthFirstSearch(...searchArgs, false);
+      if (results === null) return;
+      this.visualizer = new PFVisualizer();
+      await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true);
+    }
+
+    //else if (this.state.currentAlgorithm === Algorithms.IDDFS)
+    //  DepthFirstSearch.startDepthFirstSearch(...searchArgs, true);
+    else if (this.state.currentAlgorithm === Algorithms.WD) {
+      this.search = new Dijkstra();
+      let results = await this.search.startDijkstraSearch(...searchArgs);
+      console.log(results);
+      if (results === null) return;
+      this.visualizer = new PFVisualizer();
+      await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true);
+    } //else if (this.state.currentAlgorithm === Algorithms.AS) Astar.startAstarSearch(...searchArgs, this.finishNode);
   };
 
   stopSolving = () => {
     this.isSolving = false;
-    Dijkstra.setSolving(false);
-    DepthFirstSearch.stopSolving();
-    //BreadthFirstSearch.stopSolving();
-    Astar.setSolving(false);
   };
 
   setAlgorithm = (alg: Algorithms) => {

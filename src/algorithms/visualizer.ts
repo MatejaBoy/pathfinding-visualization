@@ -23,10 +23,12 @@ export default class PFVisualizer {
     this.shouldVis = true;
     if (this.solverTimeout === null) this.setSolverSpeed(defaultspeed);
 
+    console.log("starting visualization");
     // Visualize visited nodes
     for (const node of results.visitedNodes) {
       needtimeout ? await CommonFuncs.timeout(this.solverTimeout!) : null;
       if (!this.shouldVis) return false;
+      node.visited = true;
       node.toAnimate = true;
       setstate();
     }
@@ -39,6 +41,7 @@ export default class PFVisualizer {
       needtimeout ? await CommonFuncs.timeout(this.solverTimeout!) : null;
       if (!this.shouldVis) return false;
       node.isTestOnProp = true;
+      node.toAnimate = true;
       setstate();
     }
 
