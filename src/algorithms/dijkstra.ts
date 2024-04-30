@@ -11,7 +11,7 @@ export default class Dijkstra {
 
   isSolving: boolean = false;
 
-  async startDijkstraSearch(nodes: NodeInterface[][], startPoint: Point, setstate: Function, defaultSpeed: number) {
+  async startSearch(nodes: NodeInterface[][], startPoint: Point, setstate: Function, defaultSpeed: number) {
     this.visitedNodes = [];
     this.visitedNodes2 = [];
     this.routeNodes = [];
@@ -94,6 +94,11 @@ export default class Dijkstra {
         return currentNode;
       }
 
+      if (this.heap.arr.length < 1) {
+        console.warn("Finish Node cannot be reached!");
+        this.stopSolving();
+        return null;
+      }
       const min_node = this.heap.getMin();
       currentNode = nodes[min_node.y][min_node.x];
     }

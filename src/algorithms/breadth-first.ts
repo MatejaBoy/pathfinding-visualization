@@ -12,7 +12,7 @@ export default class BreadthFirstSearch {
   nodes: NodeInterface[][] = [];
   isFinishFound = false;
 
-  async startBreadthFirstSearch(input_nodes: NodeInterface[][], startPoint: Point): Promise<SearchResults | null> {
+  async startSearch(input_nodes: NodeInterface[][], startPoint: Point): Promise<SearchResults | null> {
     this.nodes = Array.from(input_nodes);
     this.queue = [];
     this.routeNodes = [];

@@ -1,4 +1,4 @@
-import { SearchResults } from "../components/PathFindingVisualizer";
+import { PathPointType, SearchResults } from "../components/PathFindingVisualizer";
 import CommonFuncs from "./common-func";
 
 export default class PFVisualizer {
@@ -19,13 +19,20 @@ export default class PFVisualizer {
     );
   }
 
-  async visualizeResults(results: SearchResults, setstate: Function, defaultspeed: number, needtimeout: boolean) {
+  async visualizeResults(
+    results: SearchResults,
+    setstate: Function,
+    defaultspeed: number,
+    needtimeout: boolean,
+    clear?: Function
+  ) {
     this.shouldVis = true;
     if (this.solverTimeout === null) this.setSolverSpeed(defaultspeed);
 
     console.log("starting visualization");
     // Visualize visited nodes
     for (const node of results.visitedNodes) {
+      if (node.type === PathPointType.SpacerNode && clear !== undefined) clear();
       needtimeout ? await CommonFuncs.timeout(this.solverTimeout!) : null;
       if (!this.shouldVis) return false;
       node.visited = true;

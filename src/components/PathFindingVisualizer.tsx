@@ -58,7 +58,7 @@ export enum PathPointType {
   Wall,
   Start,
   Finish,
-  RouteNode,
+  SpacerNode,
 }
 
 export enum Algorithms {
@@ -96,7 +96,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       isSHeld: false,
       isFHeld: false,
       solvespeed: 1,
-      currentAlgorithm: Algorithms.DFS,
+      currentAlgorithm: Algorithms.AS,
       isDraggingWall: false,
       dragData: null,
       isVisualizingState: false,
@@ -118,42 +118,29 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     this.startSolving();
   };
   startSolving = async () => {
-    if (this.startNode === undefined || this.finishNode === undefined) {
-      return;
-    }
-
+    if (this.startNode === undefined || this.finishNode === undefined) return;
+    const alg = this.state.currentAlgorithm;
+    let clear;
     if (this.search !== null) this.search.stopSolving();
     this.search = null;
     if (this.visualizer !== null) this.visualizer.stopVisualize();
     this.visualizer = null;
 
-    type searchParams = [nodes: NodeInterface[][], startPoint: { x: number; y: number }];
-    const searchArgs: searchParams = [this.nodes, this.startNode!];
+    if (alg === Algorithms.BFS) this.search = new BreadthFirstSearch();
+    else if (alg === Algorithms.DFS) this.search = new DepthFirstSearch(false);
+    else if (alg === Algorithms.IDDFS) {
+      this.search = new DepthFirstSearch(true);
+      clear = () => {
+        this.resetSearch(ResetType.clearsolution, false);
+      };
+    } else if (alg === Algorithms.WD) this.search = new Dijkstra();
+    else if (alg === Algorithms.AS) this.search = new Astar();
 
-    if (this.state.currentAlgorithm === Algorithms.BFS) {
-      this.search = new BreadthFirstSearch();
-      let results = await this.search.startBreadthFirstSearch(...searchArgs);
-      if (results === null) return;
-      this.visualizer = new PFVisualizer();
-      await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true);
-    } else if (this.state.currentAlgorithm === Algorithms.DFS) {
-      this.search = new DepthFirstSearch();
-      let results = await this.search.startDepthFirstSearch(...searchArgs, false);
-      if (results === null) return;
-      this.visualizer = new PFVisualizer();
-      await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true);
-    }
-
-    //else if (this.state.currentAlgorithm === Algorithms.IDDFS)
-    //  DepthFirstSearch.startDepthFirstSearch(...searchArgs, true);
-    else if (this.state.currentAlgorithm === Algorithms.WD) {
-      this.search = new Dijkstra();
-      let results = await this.search.startDijkstraSearch(...searchArgs);
-      console.log(results);
-      if (results === null) return;
-      this.visualizer = new PFVisualizer();
-      await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true);
-    } //else if (this.state.currentAlgorithm === Algorithms.AS) Astar.startAstarSearch(...searchArgs, this.finishNode);
+    if (this.search === null) return;
+    let results = await this.search.startSearch(this.nodes, this.startNode, this.finishNode);
+    if (results === null) return;
+    this.visualizer = new PFVisualizer();
+    await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true, clear);
   };
 
   stopSolving = () => {
@@ -278,7 +265,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
         } else if (type === ResetType.resetgrid) {
           n.type = PathPointType.Normal;
         } else if (type === ResetType.cleargrid) {
-          n.type = n.type === (PathPointType.Wall || PathPointType.RouteNode) ? PathPointType.Normal : n.type;
+          n.type = n.type === PathPointType.Wall ? PathPointType.Normal : n.type;
         }
         n.rightRouteWeight = 1;
         n.bottomRouteWeight = 1;

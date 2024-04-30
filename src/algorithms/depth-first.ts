@@ -6,11 +6,16 @@ let stopTimePerf = 0;
 
 export default class DepthFirstSearch {
   // Function for creating a little delay for visualization purposes
+
+  constructor(iddfs: boolean) {
+    this.iterativeDeepening = iddfs;
+  }
   searchCounter = 0;
   isSolving = true;
   finishnode: NodeInterface | null = null;
   visitedNodes: NodeInterface[] = [];
   routeNodes: NodeInterface[] = [];
+  iterativeDeepening: boolean;
 
   stopSolving() {
     this.isSolving = false;
@@ -25,20 +30,39 @@ export default class DepthFirstSearch {
         nodes[i][j].depth = 0;
       }
     }
+    let spacerNode: NodeInterface = {
+      id: 999999,
+      x: 999,
+      y: 999,
+      type: PathPointType.SpacerNode,
+      visited: false,
+      depth: 0,
+      isAddedToQue: false,
+      isTestOnProp: false,
+      weight: 0,
+      isLastRow: false,
+      isLastCol: false,
+      rightRouteWeight: 1,
+      bottomRouteWeight: 1,
+      isRightRoutePath: false,
+      isBottomRoutePath: false,
+      toAnimate: false,
+    };
+    this.visitedNodes.push(spacerNode);
   }
 
-  async startDepthFirstSearch(nodes: NodeInterface[][], startPoint: { x: number; y: number }, deepening: boolean) {
+  async startSearch(nodes: NodeInterface[][], startPoint: { x: number; y: number }) {
     this.isSolving = true;
-    const iterativeDeepening = deepening;
+
     let iteration = 1;
     let maxDepth;
-    if (iterativeDeepening) maxDepth = 1;
+    if (this.iterativeDeepening) maxDepth = 1;
     else maxDepth = Infinity;
     let found = null;
 
     while (true) {
       found = await this.depthFirstSearch(nodes, startPoint!, maxDepth * iteration);
-      if (!iterativeDeepening || found !== null) break;
+      if (!this.iterativeDeepening || found !== null) break;
       this.resetSearchForIteration(nodes);
       iteration++;
     }
@@ -47,19 +71,16 @@ export default class DepthFirstSearch {
     return { visitedNodes: this.visitedNodes, routeNodes: this.routeNodes };
   }
 
-  async dfsBacktrack(checkNode: NodeInterface, nodes: NodeInterface[][]) {
+  async dfsBacktrack(checkNode: NodeInterface, nodes: NodeInterface[][]): Promise<boolean> {
     if (!this.isSolving) return false;
-    console.log("dfs backtrack");
+
     if (checkNode.type === PathPointType.Start) {
       stopTimePerf = performance.now();
-      // console.log(stopTime);
-      // console.log("Time it took to run the find the route: " + (stopTime - startTime));
-      // console.log("Time it took to run the find the route with perf: " + (stopTimePerf - startTimePerf));
-      return;
+      console.log("Time it took to run the find the route with perf: " + (stopTimePerf - startTimePerf));
+      return true;
     }
 
     let adjacents = CommonFuncs.findAdjacents(nodes, checkNode.x, checkNode.y);
-
     let currentBestDepth = Infinity;
     let currentBestNode = null;
     for (let i = 0; i < adjacents.length; i++) {
@@ -70,14 +91,10 @@ export default class DepthFirstSearch {
     }
 
     const checkNodeFromNodes = nodes[checkNode.y][checkNode.x];
-    if (checkNodeFromNodes.type != PathPointType.Finish) this.routeNodes.push(checkNodeFromNodes);
+    this.routeNodes.push(checkNodeFromNodes);
 
-    this.dfsBacktrack(currentBestNode!, nodes);
+    return this.dfsBacktrack(currentBestNode!, nodes);
   }
-
-  // First part of the breadth-first search algorithm:
-  // Finding the Finish point and each visited node of
-  // value based on their distance from the start node
   async depthFirstSearch(
     nodes: NodeInterface[][],
     startPoint: Point,
@@ -85,14 +102,11 @@ export default class DepthFirstSearch {
   ): Promise<NodeInterface | null> {
     if (!this.isSolving) return null;
 
-    // Updating the current state
     let start_x = startPoint.x;
     let start_y = startPoint.y;
     const currentNode = nodes[start_y][start_x];
     this.searchCounter++;
 
-    // If the current node we're checking is the Finish node we exit the recursion
-    // and start the second part of this algorithm, finding the shortest route back to the Start node
     if (currentNode.type === PathPointType.Finish) {
       console.log("Finish node found");
       return currentNode;
@@ -100,22 +114,19 @@ export default class DepthFirstSearch {
 
     if (currentNode.type === PathPointType.Start) {
       startTimePerf = performance.now();
-      console.log("depth_first_search_running");
+      // console.log("depth_first_search_running");
     }
 
-    // We set the current node to visited and push it into an array
     currentNode.visited = true;
     this.visitedNodes.push(currentNode);
     if (currentNode.depth >= depthLimit!) return null;
 
-    // We find all the adjacent nodes of the current node and iterate through them
-    // The ones that haven't been visited and aren't in the queue, we add to the queue
     const adjacents = CommonFuncs.findAdjacents(nodes, start_x, start_y);
-    console.log(adjacents);
     for (const adjacent of adjacents) {
       if (adjacent.type != PathPointType.Wall && !adjacent.visited) {
         adjacent.depth = currentNode.depth + 1;
-        return await this.depthFirstSearch(nodes, { x: adjacent.x, y: adjacent.y }, depthLimit);
+        let found = await this.depthFirstSearch(nodes, { x: adjacent.x, y: adjacent.y }, depthLimit);
+        if (found !== null) return found;
       }
     }
     return null;
