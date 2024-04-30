@@ -36,6 +36,7 @@ export default function Maingrid(props: MaingridProps) {
                     isVisitedProp={node.visited}
                     depthProp={node.depth}
                     isTestOnProp={node.isTestOnProp}
+                    isRouteNodeProp={node.isRouteNode}
                     weight={node.weight}
                     setNodeType={props.setNodeType}
                     clickOnRoute={props.clickOnRoute}

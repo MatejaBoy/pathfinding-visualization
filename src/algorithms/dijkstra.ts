@@ -11,7 +11,7 @@ export default class Dijkstra {
 
   isSolving: boolean = false;
 
-  async startSearch(nodes: NodeInterface[][], startPoint: Point, setstate: Function, defaultSpeed: number) {
+  async startSearch(nodes: NodeInterface[][], startPoint: Point) {
     this.visitedNodes = [];
     this.visitedNodes2 = [];
     this.routeNodes = [];
@@ -28,37 +28,11 @@ export default class Dijkstra {
     this.isSolving = false;
   }
 
-  async dijkstraBacktrack(nodes: NodeInterface[][], x: number, y: number) {
-    if (!this.isSolving) return;
-    let currentNode = nodes[y][x];
-
-    while (currentNode.type !== PathPointType.Start) {
-      for (const element of this.visitedNodes) {
-        if (element.x === currentNode.x && element.y === currentNode.y) {
-          let prev_x = element.prev!.x;
-          let prev_y = element.prev!.y;
-
-          if (prev_x === currentNode.x - 1) nodes[prev_y][prev_x].isRightRoutePath = true;
-          else if (prev_x === currentNode.x + 1) currentNode.isRightRoutePath = true;
-          else if (prev_y === currentNode.y - 1) nodes[prev_y][prev_x].isBottomRoutePath = true;
-          else currentNode.isBottomRoutePath = true;
-
-          if (nodes[element.y][element.x].type !== PathPointType.Finish)
-            this.routeNodes.push(nodes[element.y][element.x]);
-          currentNode = nodes[prev_y][prev_x];
-        }
-      }
-    }
-    return;
-  }
-
   async dijkstraSearch(nodes: NodeInterface[][], startPoint: { x: number; y: number }) {
     if (!this.isSolving) return null;
 
-    // When we start the search the current node is the start node
     let currentNode = nodes[startPoint.y][startPoint.x];
 
-    // Repeating until the finish in found
     while (this.isSolving) {
       currentNode.visited = true;
 
@@ -73,15 +47,19 @@ export default class Dijkstra {
         else if (adj.y === currentNode.y - 1) distanceBetweenNodes = adj.bottomRouteWeight;
         else distanceBetweenNodes = currentNode.bottomRouteWeight;
 
-        let newDist = distanceBetweenNodes + this.heap.arr[0].dist;
+        let adjCost = distanceBetweenNodes + this.heap.arr[0].dist;
         // Finding the index of the adjacents node in the Heap
-        let adjHeapIndex = this.heap.findByCoords(adj.x, adj.y);
+
+        const adjHeapIndex = this.heap.findByCoords(adj.x, adj.y);
         if (adjHeapIndex === -1) {
-          if (!adj.visited)
-            this.heap.insert({ x: adj.x, y: adj.y, dist: newDist, prev: { x: currentNode.x, y: currentNode.y } });
-        } else if (distanceBetweenNodes + this.heap.arr[0].dist < this.heap.arr[adjHeapIndex].dist) {
+          if (!adj.visited) {
+            this.heap.insert({ x: adj.x, y: adj.y, dist: adjCost, prev: { x: currentNode.x, y: currentNode.y } });
+            nodes[adj.y][adj.x].depth = adjCost;
+          }
+        } else if (adjCost < this.heap.arr[adjHeapIndex].dist) {
           this.heap.arr[adjHeapIndex].prev = { x: currentNode.x, y: currentNode.y };
-          this.heap.decreaseKey(adjHeapIndex, distanceBetweenNodes + this.heap.arr[0].dist);
+          this.heap.decreaseKey(adjHeapIndex, adjCost);
+          nodes[adj.y][adj.x].depth = adjCost;
         }
       }
 
@@ -90,7 +68,6 @@ export default class Dijkstra {
       this.visitedNodes2.push(nodes[min!.y][min!.x]);
 
       if (currentNode.type === PathPointType.Finish) {
-        console.log("Finish found");
         return currentNode;
       }
 
@@ -103,5 +80,29 @@ export default class Dijkstra {
       currentNode = nodes[min_node.y][min_node.x];
     }
     return null;
+  }
+
+  async dijkstraBacktrack(nodes: NodeInterface[][], x: number, y: number) {
+    if (!this.isSolving) return;
+    let currentNode = nodes[y][x];
+
+    while (currentNode.type !== PathPointType.Start && this.isSolving) {
+      for (const element of this.visitedNodes) {
+        if (element.x === currentNode.x && element.y === currentNode.y) {
+          let prev_x = element.prev!.x;
+          let prev_y = element.prev!.y;
+
+          /*if (prev_x === currentNode.x - 1) nodes[prev_y][prev_x].isRightRoutePath = true;
+          else if (prev_x === currentNode.x + 1) currentNode.isRightRoutePath = true;
+          else if (prev_y === currentNode.y - 1) nodes[prev_y][prev_x].isBottomRoutePath = true;
+          else currentNode.isBottomRoutePath = true;*/
+
+          if (nodes[element.y][element.x].type !== PathPointType.Finish)
+            this.routeNodes.push(nodes[element.y][element.x]);
+          currentNode = nodes[prev_y][prev_x];
+        }
+      }
+    }
+    return;
   }
 }

@@ -42,6 +42,7 @@ export default class DepthFirstSearch {
       weight: 0,
       isLastRow: false,
       isLastCol: false,
+      isRouteNode: false,
       rightRouteWeight: 1,
       bottomRouteWeight: 1,
       isRightRoutePath: false,

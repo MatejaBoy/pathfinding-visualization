@@ -11,6 +11,7 @@ interface NodeProps {
   isVisitedProp: boolean;
   depthProp: number;
   isTestOnProp: boolean;
+  isRouteNodeProp: boolean;
   weight: number;
   setNodeType: Function;
   clickOnRoute: (nodeInfo: [number, number, number], dir: string) => void;
@@ -29,12 +30,14 @@ interface NodeProps {
 export default function Node(node: NodeProps) {
   const [nodeType, setNodeType] = useState(node.nodeTypeProp);
   const [isTest, setIsTest] = useState(node.isTestOnProp);
+  const [isRouteNode, setIsRouteNode] = useState(node.isRouteNodeProp);
   const [rightRouteWidth, setRigthRouteWidth] = useState(node.rightRouteWeightProp);
   const [bottomRouteWidth, setBottomRouteWidth] = useState(node.bottomRouteWeightProp);
   const [isRightRoutePath, setIsRightRoutePath] = useState(node.isRightRoutePathProp);
   const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
   const [toAnimate, setToAnimate] = useState(node.toAnimateProp);
   const [isVisited, setIsVisited] = useState(node.isVisitedProp);
+  const [depth, setDepth] = useState(node.depthProp);
 
   useEffect(() => {
     setToAnimate(node.toAnimateProp);
@@ -47,6 +50,10 @@ export default function Node(node: NodeProps) {
   useEffect(() => {
     setIsVisited(node.isVisitedProp);
   }, [node.isVisitedProp]);
+
+  useEffect(() => {
+    setIsRouteNode(node.isRouteNodeProp);
+  }, [node.isRouteNodeProp]);
 
   useEffect(() => {
     setIsTest(node.isTestOnProp);
@@ -68,6 +75,9 @@ export default function Node(node: NodeProps) {
     setIsBottomRoutePath(node.isBottomRoutePathProp);
   }, [node.isBottomRoutePathProp]);
 
+  useEffect(() => {
+    setDepth(node.depthProp);
+  }, [node.depthProp]);
   // Handling dragging the mouse over a Node
   // -- calling clickOnNode with drag=true --
   async function onMouseMouseOver(e: React.MouseEvent) {
@@ -98,8 +108,9 @@ export default function Node(node: NodeProps) {
     if (event.buttons) node.setDragData({ nodetype: nodeType, prevNode: { x: node.x, y: node.y } });
   }
 
-  function getVisitedModifier() {
+  function getVisualizerModifier() {
     if (isTest && toAnimate) return "testcolor";
+    else if (isRouteNode && toAnimate) return "routenode";
     else if (isVisited && toAnimate == true) return "visited";
     else return "";
   }
@@ -132,12 +143,14 @@ export default function Node(node: NodeProps) {
   let returnDiv = (
     <div className="tilewrapper">
       <div
-        className={"tile" + " " + getClassModifier() + " " + getVisitedModifier()}
+        className={"tile" + " " + getClassModifier() + " " + getVisualizerModifier()}
         key={node.id}
         onMouseOver={onMouseMouseOver}
         onMouseDown={onMouseDown}
         onMouseLeave={onMouseLeave}
-      ></div>
+      >
+        {depth}
+      </div>
       <div
         style={{
           display: node.isLastCol ? "none" : "block",

@@ -19,6 +19,7 @@ export interface NodeInterface {
   isAddedToQue: boolean;
   depth: number;
   isTestOnProp: boolean;
+  isRouteNode: boolean;
   weight: number;
   isLastRow: boolean;
   isLastCol: boolean;
@@ -183,7 +184,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       this.finishNode = nodeInfo;
       this.nodes[nodeInfo.y][nodeInfo.x].type = type;
       if (this.state.isVisualizingState && this.isVisualizing) this.clearAndRestartSolve();
-    } else if (type === PathPointType.Wall) {
+    } else if (type === PathPointType.Wall || type === PathPointType.Normal) {
       this.nodes[nodeInfo.y][nodeInfo.x].type = type;
     }
     this.setState({});
@@ -226,6 +227,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           depth: 0,
           isAddedToQue: false,
           isTestOnProp: false,
+          isRouteNode: false,
           weight: CommonFuncs.getRandomInt(20),
           isLastRow: row < this.gridsize.y - 1 ? false : true,
           isLastCol: col < this.gridsize.x - 1 ? false : true,
@@ -257,6 +259,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
         n.isAddedToQue = false;
         n.isTestOnProp = false;
         n.visited = false;
+        n.isRouteNode = false;
         n.depth = 0;
         n.toAnimate = false;
 

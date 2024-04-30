@@ -39,7 +39,7 @@ export default class BreadthFirstSearch {
       return true;
     }
 
-    let adjacents = BreadthFirstSearch.findAdjacentsBacktrack(this.visitedNodes, checkNode);
+    let adjacents = this.findAdjacentsBacktrack(this.visitedNodes, checkNode);
     let currentBestNode = adjacents[0];
     for (let i = 0; i < adjacents.length; i++) {
       if (adjacents[i].depth < currentBestNode.depth) {
@@ -85,7 +85,7 @@ export default class BreadthFirstSearch {
     return this.breadthFirstSearch(nodes, { x: this.queue[0].x, y: this.queue[0].y });
   }
 
-  static findAdjacentsBacktrack(nodes: NodeInterface[], checkNode: NodeInterface) {
+  findAdjacentsBacktrack(nodes: NodeInterface[], checkNode: NodeInterface) {
     let base_x = checkNode.x;
     let base_y = checkNode.y;
     let adjacents = [];

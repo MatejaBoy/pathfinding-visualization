@@ -29,7 +29,6 @@ export default class PFVisualizer {
     this.shouldVis = true;
     if (this.solverTimeout === null) this.setSolverSpeed(defaultspeed);
 
-    console.log("starting visualization");
     // Visualize visited nodes
     for (const node of results.visitedNodes) {
       if (node.type === PathPointType.SpacerNode && clear !== undefined) clear();
@@ -47,7 +46,7 @@ export default class PFVisualizer {
     for (const node of results.routeNodes) {
       needtimeout ? await CommonFuncs.timeout(this.solverTimeout!) : null;
       if (!this.shouldVis) return false;
-      node.isTestOnProp = true;
+      node.isRouteNode = true;
       node.toAnimate = true;
       setstate();
     }

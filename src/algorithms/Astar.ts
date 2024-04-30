@@ -10,8 +10,6 @@ export default class Astar {
   isSolving = true;
 
   async startSearch(nodes: NodeInterface[][], startPoint: Point, finishPoint: Point) {
-    console.log("Startin A* search");
-    // Clear the previous solution
     this.visitedNodes = [];
     this.heap = new NodeMinHeap();
     this.heap.insert({ x: startPoint.x, y: startPoint.y, dist: 0, prev: undefined });
@@ -19,7 +17,6 @@ export default class Astar {
     // Start the search
     this.isSolving = true;
     let found = await this.AstarSearch(nodes, startPoint, finishPoint);
-    console.log(found);
     if (found !== null) await this.aStarBacktrack(nodes, found.x, found.y);
     return { visitedNodes: this.visitedNodes2, routeNodes: this.routeNodes };
   }
@@ -57,13 +54,16 @@ export default class Astar {
         let h = this.calcHeuristics({ x: adj.x, y: adj.y }, { x: finishPoint.x, y: finishPoint.y });
         let adjCost = g + h;
 
-        const adjIndex = this.heap.findByCoords(adj.x, adj.y);
-        if (adjIndex === -1) {
-          if (!adj.visited)
+        const adjHeapIndex = this.heap.findByCoords(adj.x, adj.y);
+        if (adjHeapIndex === -1) {
+          if (!adj.visited) {
             this.heap.insert({ x: adj.x, y: adj.y, dist: adjCost, prev: { x: currentNode.x, y: currentNode.y } });
-        } else if (adjCost < this.heap.arr[adjIndex].dist) {
-          this.heap.arr[adjIndex].prev = { x: currentNode.x, y: currentNode.y };
-          this.heap.decreaseKey(adjIndex, adjCost);
+            nodes[adj.y][adj.x].depth = adjCost;
+          }
+        } else if (adjCost < this.heap.arr[adjHeapIndex].dist) {
+          this.heap.arr[adjHeapIndex].prev = { x: currentNode.x, y: currentNode.y };
+          this.heap.decreaseKey(adjHeapIndex, adjCost);
+          nodes[adj.y][adj.x].depth = adjCost;
         }
       }
 
@@ -72,12 +72,10 @@ export default class Astar {
       this.visitedNodes2.push(nodes[min!.y][min!.x]);
 
       if (currentNode.type === PathPointType.Finish) {
-        console.log("Finish found");
         return currentNode;
       }
 
       if (this.heap.arr.length < 1) {
-        console.warn("Finish Node cannot be reached!");
         this.stopSolving();
         return null;
       }
@@ -97,8 +95,8 @@ export default class Astar {
         if (element.x === currentNode.x && element.y === currentNode.y) {
           let prev_x = element.prev!.x;
           let prev_y = element.prev!.y;
-          /*
-          if (prev_x === currentNode.x - 1) nodes[prev_y][prev_x].isRightRoutePath = true;
+
+          /*if (prev_x === currentNode.x - 1) nodes[prev_y][prev_x].isRightRoutePath = true;
           else if (prev_x === currentNode.x + 1) currentNode.isRightRoutePath = true;
           else if (prev_y === currentNode.y - 1) nodes[prev_y][prev_x].isBottomRoutePath = true;
           else currentNode.isBottomRoutePath = true;*/
@@ -109,5 +107,7 @@ export default class Astar {
         }
       }
     }
+
+    return;
   }
 }
