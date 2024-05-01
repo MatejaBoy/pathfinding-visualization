@@ -82,7 +82,8 @@ export default function Node(node: NodeProps) {
   // -- calling clickOnNode with drag=true --
   async function onMouseMouseOver(e: React.MouseEvent) {
     if (node.dragData !== null && e.buttons) {
-      if (nodeType === node.dragData.nodetype) return;
+      if (nodeType === PathPointType.Start || nodeType === PathPointType.Finish) return;
+
       node.setNodeType({ x: node.x, y: node.y }, node.dragData!.nodetype);
       node.setDragData({ nodetype: node.dragData.nodetype, prevNode: { x: node.x, y: node.y } });
       return;
@@ -116,15 +117,12 @@ export default function Node(node: NodeProps) {
   }
 
   function getClassModifierRightRoute() {
-    if (!isRightRoutePath) {
-      return "_" + rightRouteWidth.toString();
-    } else {
-      return "_" + rightRouteWidth.toString() + " routepath";
-    }
+    // if (isRightRoutePath && toAnimate) return "_" + rightRouteWidth.toString() + " routepath";
+    return "_" + rightRouteWidth.toString();
   }
   function getClassModifierBottomRoute() {
-    if (!isBottomRoutePath) return "_" + bottomRouteWidth.toString();
-    else return "_" + bottomRouteWidth.toString() + " routepath";
+    // if (isRightRoutePath && toAnimate) return "_" + rightRouteWidth.toString() + " routepath";
+    return "_" + bottomRouteWidth.toString();
   }
 
   function getClassModifier() {
@@ -148,9 +146,7 @@ export default function Node(node: NodeProps) {
         onMouseOver={onMouseMouseOver}
         onMouseDown={onMouseDown}
         onMouseLeave={onMouseLeave}
-      >
-        {depth}
-      </div>
+      ></div>
       <div
         style={{
           display: node.isLastCol ? "none" : "block",

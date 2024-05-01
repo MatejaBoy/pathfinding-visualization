@@ -1,7 +1,10 @@
 export interface NodeMinHeapInterface {
   x: number;
   y: number;
-  dist: number;
+  // dist: number;
+  g_val: number;
+  h_val: number;
+  f_val: number;
   prev?: { x: number; y: number };
 }
 
@@ -46,7 +49,7 @@ export default class NodeMinHeap {
     let arr = this.arr;
     arr.push(k);
     let i = arr.length - 1;
-    while (i > 0 && arr[this.parent(i)].dist > arr[i].dist) {
+    while (i > 0 && arr[this.parent(i)].f_val > arr[i].f_val) {
       let p = this.parent(i); // Index of parent node
       [arr[p], arr[i]] = [arr[i], arr[p]]; // If the child is smaller than the parent, we swap the two
       i = p;
@@ -56,8 +59,8 @@ export default class NodeMinHeap {
   // Decrease the value of an already existing key in the arr
   decreaseKey(i: number, new_val: number) {
     let arr = this.arr;
-    arr[i].dist = new_val;
-    while (i > 0 && arr[this.parent(i)].dist > arr[i].dist) {
+    arr[i].f_val = new_val;
+    while (i > 0 && arr[this.parent(i)].f_val > arr[i].f_val) {
       let p = this.parent(i);
       [arr[p], arr[i]] = [arr[i], arr[p]];
       i = p;
@@ -85,7 +88,7 @@ export default class NodeMinHeap {
   // We the delete a key by putting it at root position by decreasing
   // its value to be lower than the current root node
   delete(i: number) {
-    this.decreaseKey(i, this.arr[0].dist - 1);
+    this.decreaseKey(i, this.arr[0].f_val - 1);
     this.extractMin();
   }
 
@@ -101,10 +104,10 @@ export default class NodeMinHeap {
     // The goal of these are determining the smallest value from the parent and its children
     // Firstly we check if l and r even exist in the array (l < n)
     // Secondly the check if the left node is smaller than the parent
-    if (l < n && arr[l].dist < arr[i].dist) {
+    if (l < n && arr[l].f_val < arr[i].f_val) {
       smallest = l;
     }
-    if (r < n && arr[r].dist < arr[smallest].dist) {
+    if (r < n && arr[r].f_val < arr[smallest].f_val) {
       smallest = r;
     }
 
