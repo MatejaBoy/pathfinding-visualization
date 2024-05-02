@@ -49,6 +49,7 @@ interface PathFindingVisualizerState {
   isVisualizingState: boolean;
   hasVisFound: boolean;
   solveTime: number;
+  isInfoBoxVisible: boolean;
 }
 
 export enum PathPointType {
@@ -98,6 +99,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       isVisualizingState: false,
       hasVisFound: false,
       solveTime: 0,
+      isInfoBoxVisible: true,
     };
   }
 
@@ -135,12 +137,21 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     else if (alg === Algorithms.AS) this.search = new Astar();
 
     if (this.search === null) return;
-    let results = await this.search.startSearch(this.nodes, this.startNode, this.finishNode);
+    let results = await this.search.startSearch(
+      this.nodes,
+      this.startNode,
+      this.finishNode
+    );
     if (results === null) return;
     this.setSolveTime(results.time);
-    console.log(results.time);
     this.visualizer = new PFVisualizer();
-    await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true, clear);
+    await this.visualizer.visualizeResults(
+      results,
+      this.customSetState,
+      this.currentSpeed,
+      true,
+      clear
+    );
   };
 
   stopSolving = () => {
@@ -155,7 +166,11 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   handleClickOnRoute = (nodeInfo: [number, number, number], dir: string) => {
     // console.log("Click on route");
     if (this.isSolving) return;
-    if (this.state.currentAlgorithm !== Algorithms.WD && this.state.currentAlgorithm !== Algorithms.AS) return;
+    if (
+      this.state.currentAlgorithm !== Algorithms.WD &&
+      this.state.currentAlgorithm !== Algorithms.AS
+    )
+      return;
     const currentNode = this.nodes[nodeInfo[2]][nodeInfo[1]];
 
     if (dir === "right") {
@@ -170,19 +185,27 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     }
   };
 
-  setPointType = (nodeInfo: Point, type: PathPointType, _prevType: PathPointType) => {
+  setPointType = (
+    nodeInfo: Point,
+    type: PathPointType,
+    _prevType: PathPointType
+  ) => {
     //if (this.isSolving) return;
 
     if (type === PathPointType.Start) {
-      this.nodes[this.startNode!.y][this.startNode!.x].type = PathPointType.Normal;
+      this.nodes[this.startNode!.y][this.startNode!.x].type =
+        PathPointType.Normal;
       this.startNode = nodeInfo;
       this.nodes[nodeInfo.y][nodeInfo.x].type = type;
-      if (this.state.isVisualizingState && this.isVisualizing) this.clearAndRestartSolve();
+      if (this.state.isVisualizingState && this.isVisualizing)
+        this.clearAndRestartSolve();
     } else if (type === PathPointType.Finish) {
-      this.nodes[this.finishNode!.y][this.finishNode!.x].type = PathPointType.Normal;
+      this.nodes[this.finishNode!.y][this.finishNode!.x].type =
+        PathPointType.Normal;
       this.finishNode = nodeInfo;
       this.nodes[nodeInfo.y][nodeInfo.x].type = type;
-      if (this.state.isVisualizingState && this.isVisualizing) this.clearAndRestartSolve();
+      if (this.state.isVisualizingState && this.isVisualizing)
+        this.clearAndRestartSolve();
     } else if (type === PathPointType.Wall || type === PathPointType.Normal) {
       this.nodes[nodeInfo.y][nodeInfo.x].type = type;
     }
@@ -199,12 +222,12 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   componentDidMount(): void {
     this.createGrid();
-    window.addEventListener('resize', this.onWindowSizeChange);
-    return 
+    window.addEventListener("resize", this.onWindowSizeChange);
+    return;
   }
 
   componentWillUnmount(): void {
-      window.removeEventListener('resize', this.onWindowSizeChange);
+    window.removeEventListener("resize", this.onWindowSizeChange);
   }
 
   onWindowSizeChange = () => {
@@ -213,19 +236,26 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   createGrid() {
     let width = window.innerWidth;
+    if (!this.state.isInfoBoxVisible) width += 400;
     console.log(width);
-    this.gridsize.x = Math.round(width / 80);
+    this.gridsize.x = Math.round(width / 85);
     let node_list = [];
     let node_rows = [];
     let current_id = 0;
     for (let row = 0; row < this.gridsize.y; row++) {
       for (let col = 0; col < this.gridsize.x; col++) {
         let nodeType = PathPointType.Normal;
-        if (col === this.defaultStartNode.x && row === this.defaultStartNode.y) {
+        if (
+          col === this.defaultStartNode.x &&
+          row === this.defaultStartNode.y
+        ) {
           nodeType = PathPointType.Start;
           //this.setState({ startNode: { x: col, y: row } });
           this.startNode = { x: col, y: row };
-        } else if (col === this.defaultFinishNode.x && row === this.defaultFinishNode.y) {
+        } else if (
+          col === this.defaultFinishNode.x &&
+          row === this.defaultFinishNode.y
+        ) {
           nodeType = PathPointType.Finish;
           this.finishNode = { x: col, y: row };
           // this.setState({ finishNode: { x: col, y: row } });
@@ -255,7 +285,6 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       node_list.push(node_rows);
       node_rows = [];
     }
-    //this.setState({ nodes: node_list });
     this.nodes = node_list;
     this.setState({});
   }
@@ -282,21 +311,27 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
         } else if (type === ResetType.resetgrid) {
           n.type = PathPointType.Normal;
         } else if (type === ResetType.cleargrid) {
-          n.type = n.type === PathPointType.Wall ? PathPointType.Normal : n.type;
+          n.type =
+            n.type === PathPointType.Wall ? PathPointType.Normal : n.type;
         }
         n.rightRouteWeight = 1;
         n.bottomRouteWeight = 1;
       }
     }
 
-    // this.isSolving = false;
-
-    // this.setState({ startNode: undefined, finishNode: undefined, isSolving: false });
     if (type === ResetType.resetgrid) {
       this.setState({ isVisualizingState: false });
       this.isVisualizing = false;
-      this.setPointType(this.defaultStartNode, PathPointType.Start, PathPointType.Normal);
-      this.setPointType(this.defaultFinishNode, PathPointType.Finish, PathPointType.Normal);
+      this.setPointType(
+        this.defaultStartNode,
+        PathPointType.Start,
+        PathPointType.Normal
+      );
+      this.setPointType(
+        this.defaultFinishNode,
+        PathPointType.Finish,
+        PathPointType.Normal
+      );
     }
     this.setState({});
   };
@@ -311,16 +346,10 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   cancelDragging = () => {
     if (this.state.dragData === null) return;
-    /*this.setPointType(
-      { x: this.state.dragData.prevNode.x, y: this.state.dragData.prevNode.y },
-      this.state.dragData.nodetype,
-      PathPointType.Normal
-    );*/
     this.setDragData(null);
   };
 
   setIsVisualizing = (isVis: boolean) => {
-    // console.log(this.state.isVisualizing);
     this.isVisualizing = isVis;
     this.setState({ isVisualizingState: isVis }, () => {
       if (!this.state.hasVisFound && this.state.isVisualizingState) {
@@ -337,16 +366,17 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     this.setState({ solveTime: Math.round(time * 10) / 10 });
   };
 
-  addCol = () => {
-    //this.gridsize.x++;
-    this.createGrid();
-  };
-
-  setRowNum = (inc:boolean) => {
-
+  setRowNum = (inc: boolean) => {
     if (!inc && this.gridsize.y > 6) this.gridsize.y--;
     else if (inc) this.gridsize.y++;
     this.createGrid();
+  };
+
+  setInfoBoxVisiblity = () => {
+    this.setState(
+      { isInfoBoxVisible: !this.state.isInfoBoxVisible },
+      this.createGrid
+    );
   };
 
   render() {
@@ -360,10 +390,15 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           isVisualizing={this.state.isVisualizingState}
           setIsVisualizing={this.setIsVisualizing}
           setRowNum={this.setRowNum}
+          setInfoBoxVis={this.setInfoBoxVisiblity}
+          isInfoBoxVis={this.state.isInfoBoxVisible}
         />
         <div id="mainbody">
-          <div className="main-col-1">
-            <Infocontainer algorithm={this.state.currentAlgorithm} setalg={this.setAlgorithm} />
+          <div hidden={!this.state.isInfoBoxVisible} className="main-col-1">
+            <Infocontainer
+              algorithm={this.state.currentAlgorithm}
+              setalg={this.setAlgorithm}
+            />
           </div>
           <div className="main-col-2">
             <Maingrid
@@ -378,7 +413,13 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           </div>
           <div className="main-col-3">
             <SolveTimeDisplay solvetimeProps={this.state.solveTime} />
-            <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
+            <SliderComponent
+              onchange={this.setSpeed}
+              defaultval={this.defaultSpeed}
+              max={100}
+              min={10}
+              step={10}
+            />
           </div>
         </div>
       </div>

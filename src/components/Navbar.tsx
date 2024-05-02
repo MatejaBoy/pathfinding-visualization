@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Algorithms, ResetType } from "./PathFindingVisualizer";
+import { usePub } from "../hooks/usePubSub";
 
 interface NavbarProps {
   setAlg: Function;
@@ -7,16 +8,25 @@ interface NavbarProps {
   stopSolving: () => void;
   resetSearch: (type: ResetType, resettimeout: boolean) => void;
   setIsVisualizing: (isVis: boolean) => void;
-  setRowNum: (inc:boolean) => void;
+  setRowNum: (inc: boolean) => void;
+  setInfoBoxVis: () => void;
   isVisualizing: boolean;
+  isInfoBoxVis: boolean;
 }
 
 function Navbar(props: NavbarProps) {
   const [isVisualizing, setIsVisualizing] = useState(props.isVisualizing);
+  const [infoBoxVis, setInfoBoxVis] = useState(props.isInfoBoxVis);
 
   useEffect(() => {
     setIsVisualizing(props.isVisualizing);
   }, [props.isVisualizing]);
+
+  useEffect(() => {
+    setInfoBoxVis(props.isInfoBoxVis);
+  }, [props.isInfoBoxVis]);
+
+  const publish = usePub();
 
   function clickOnAlgorithm(event: React.MouseEvent<HTMLAnchorElement>) {
     let alg;
@@ -46,7 +56,11 @@ function Navbar(props: NavbarProps) {
   }
 
   return (
-    <nav id="navbar" className="navbar center fixed-top navbar-expand-sm bg-body-tertiary" data-bs-theme="dark">
+    <nav
+      id="navbar"
+      className="navbar center fixed-top navbar-expand-sm bg-body-tertiary"
+      data-bs-theme="dark"
+    >
       <div className="container-fluid">
         <a className="navbar-brand" href="#">
           Pathfinder
@@ -76,7 +90,12 @@ function Navbar(props: NavbarProps) {
               </a>
               <ul className="dropdown-menu">
                 <li>
-                  <a id="bfsbutton" onClick={clickOnAlgorithm} className="dropdown-item" href="#">
+                  <a
+                    id="bfsbutton"
+                    onClick={clickOnAlgorithm}
+                    className="dropdown-item"
+                    href="#"
+                  >
                     Breadth First search
                   </a>
                 </li>
@@ -84,7 +103,12 @@ function Navbar(props: NavbarProps) {
                   <hr className="dropdown-divider" />
                 </li>
                 <li>
-                  <a id="dfsbutton" onClick={clickOnAlgorithm} className="dropdown-item" href="#">
+                  <a
+                    id="dfsbutton"
+                    onClick={clickOnAlgorithm}
+                    className="dropdown-item"
+                    href="#"
+                  >
                     Depth First search
                   </a>
                 </li>
@@ -92,7 +116,12 @@ function Navbar(props: NavbarProps) {
                   <hr className="dropdown-divider" />
                 </li>
                 <li>
-                  <a id="wdbutton" onClick={clickOnAlgorithm} className="dropdown-item" href="#">
+                  <a
+                    id="wdbutton"
+                    onClick={clickOnAlgorithm}
+                    className="dropdown-item"
+                    href="#"
+                  >
                     Dijkstra search
                   </a>
                 </li>
@@ -100,18 +129,30 @@ function Navbar(props: NavbarProps) {
                   <hr className="dropdown-divider" />
                 </li>
                 <li>
-                  <a id="asbutton" onClick={clickOnAlgorithm} className="dropdown-item" href="#">
+                  <a
+                    id="asbutton"
+                    onClick={clickOnAlgorithm}
+                    className="dropdown-item"
+                    href="#"
+                  >
                     A* search
                   </a>
                 </li>
               </ul>
             </li>
             <li className="nav-item">
-              <a role="button" className="nav-link active" key={"resetButton"}>
-                Information
+              <a
+                role="button"
+                onClick={() => {
+                  // publish("change_info_modal_state", true);
+                  props.setInfoBoxVis();
+                }}
+                className="nav-link active"
+                key={"resetButton"}
+              >
+                {infoBoxVis ? "Hide Information" : "Show Information"}
               </a>
             </li>
-
             <li className="nav-item">
               <a
                 role="button"
@@ -158,23 +199,34 @@ function Navbar(props: NavbarProps) {
                 Reset grid
               </a>
             </li>
-            {/* <li className="nav-item">
-              <a
-                role="button"
-                className="nav-link active"
-                key={"addRowButton"}
-                onClick={() => {
-                  props.addRow();
-                }}
-              >
-                Add row
-              </a>
-            </li> */}
             <li className="nav-item">
-              <div style={{textAlign:"center"}} className="btn-group" role="group" aria-label="Basic mixed styles example">
-                <button type="button" className="btn" onClick={() => {props.setRowNum(false);}}>-</button>
-                <div className="btn" style={{color:"white"}}>Rows</div>
-                <button type="button" className="btn" onClick={() => {props.setRowNum(true);}}>+</button>
+              <div
+                style={{ textAlign: "center" }}
+                className="btn-group"
+                role="group"
+                aria-label="Basic mixed styles example"
+              >
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    props.setRowNum(false);
+                  }}
+                >
+                  -
+                </button>
+                <div className="btn" style={{ color: "white" }}>
+                  Rows
+                </div>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    props.setRowNum(true);
+                  }}
+                >
+                  +
+                </button>
               </div>
             </li>
           </ul>

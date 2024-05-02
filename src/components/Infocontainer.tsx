@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Algorithms } from "./PathFindingVisualizer";
+import { useSub } from "../hooks/usePubSub";
 
 interface InfocontainerProps {
   algorithm: Algorithms;
@@ -8,10 +9,18 @@ interface InfocontainerProps {
 
 export default function Infocontainer(props: InfocontainerProps) {
   const [alg, setAlg] = useState(props.algorithm);
+  const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
     setAlg(props.algorithm);
   }, [props.algorithm]);
+
+  useSub("change_info_modal_state", subCallback);
+
+  function subCallback(data: boolean) {
+    console.log(data);
+    setIsHidden(data);
+  }
 
   function handleCheckboxChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (event.currentTarget.checked) props.setalg(Algorithms.IDDFS);
@@ -46,28 +55,57 @@ export default function Infocontainer(props: InfocontainerProps) {
 
   return (
     <>
-      <div className="info-container">
+      <div hidden={isHidden} className="info-container">
         <h6 style={{ fontWeight: "600", textAlign: "center" }}>{getTitle()}</h6>
         <p>
-          This algorithm is used in weighted graphs to find the shortest route from to start node to the finish node.
+          This algorithm is used in weighted graphs to find the shortest route
+          from to start node to the finish node.
         </p>
 
         <div
-          style={{ display: props.algorithm === Algorithms.DFS || props.algorithm === Algorithms.IDDFS ? "" : "none" }}
+          style={{
+            display:
+              props.algorithm === Algorithms.DFS ||
+              props.algorithm === Algorithms.IDDFS
+                ? ""
+                : "none",
+          }}
           className="checkbox-wrapper-24"
         >
-          <input onChange={handleCheckboxChange} type="checkbox" id="check-24" name="check" value="asd" />
+          <input
+            onChange={handleCheckboxChange}
+            type="checkbox"
+            id="check-24"
+            name="check"
+            value="asd"
+          />
           <label htmlFor="check-24">
             <span></span>Iterative deepening
           </label>
         </div>
 
         <h6 style={{ textAlign: "center" }}>How to use:</h6>
-        <ul style={{ marginBottom: "0", listStyleType: "auto", textAlign: "justify", paddingLeft: 15 }}>
-          <li>Press the "Set start node" and "Set finish node" buttons to choose a random start and finish nodes</li>
+        <ul
+          style={{
+            marginBottom: "0",
+            listStyleType: "auto",
+            textAlign: "justify",
+            paddingLeft: 15,
+          }}
+        >
+          <li>
+            Press the "Set start node" and "Set finish node" buttons to choose a
+            random start and finish nodes
+          </li>
           <li>Press on a node in the grid to set it to a wall</li>
-          <li style={{ display: alg != Algorithms.WD && alg != Algorithms.AS ? "none" : "" }}>
-            Press on a route between two nodes once or multiple times to increase its weight{" "}
+          <li
+            style={{
+              display:
+                alg != Algorithms.WD && alg != Algorithms.AS ? "none" : "",
+            }}
+          >
+            Press on a route between two nodes once or multiple times to
+            increase its weight{" "}
           </li>
           <li>Press the "Start solving" button</li>
           <li>Use the "Speed" slider to set the solving speed</li>
