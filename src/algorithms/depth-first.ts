@@ -61,6 +61,7 @@ export default class DepthFirstSearch {
     else maxDepth = Infinity;
     let found = null;
 
+    const startTime = performance.now();
     while (true) {
       found = await this.depthFirstSearch(nodes, startPoint!, maxDepth * iteration);
       if (!this.iterativeDeepening || found !== null) break;
@@ -69,7 +70,8 @@ export default class DepthFirstSearch {
     }
 
     if (found !== null) await this.dfsBacktrack(found, nodes);
-    return { visitedNodes: this.visitedNodes, routeNodes: this.routeNodes };
+    const endTime = performance.now() - startTime;
+    return { visitedNodes: this.visitedNodes, routeNodes: this.routeNodes, time: endTime };
   }
 
   async dfsBacktrack(checkNode: NodeInterface, nodes: NodeInterface[][]): Promise<boolean> {

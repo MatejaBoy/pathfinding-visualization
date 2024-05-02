@@ -8,6 +8,7 @@ export default class Astar {
   visitedNodes2: NodeInterface[] = [];
   routeNodes: NodeInterface[] = [];
   isSolving = true;
+  solveTime: number = 0;
 
   async startSearch(nodes: NodeInterface[][], startPoint: Point, finishPoint: Point) {
     this.visitedNodes = [];
@@ -18,9 +19,11 @@ export default class Astar {
 
     // Start the search
     this.isSolving = true;
+    const startTime = performance.now();
     let found = await this.AstarSearch(nodes, startPoint, finishPoint);
     if (found !== null) await this.aStarBacktrack(nodes, found.x, found.y);
-    return { visitedNodes: this.visitedNodes2, routeNodes: this.routeNodes };
+    this.solveTime = performance.now() - startTime;
+    return { visitedNodes: this.visitedNodes2, routeNodes: this.routeNodes, time: this.solveTime };
   }
 
   stopSolving() {

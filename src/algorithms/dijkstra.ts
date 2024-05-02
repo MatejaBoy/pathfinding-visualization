@@ -11,17 +11,23 @@ export default class Dijkstra {
 
   isSolving: boolean = false;
 
+  constructor() {
+    console.log("new Dijkstra created");
+  }
+
   async startSearch(nodes: NodeInterface[][], startPoint: Point) {
     this.visitedNodes = [];
     this.visitedNodes2 = [];
     this.routeNodes = [];
     this.heap = new NodeMinHeap();
-    this.heap.insert({ x: startPoint.x, y: startPoint.y, dist: 0, prev: undefined });
+    this.heap.insert({ x: startPoint.x, y: startPoint.y, f_val: 0, g_val: 0, h_val: 0, prev: undefined });
     this.isSolving = true;
 
+    const startTime = performance.now();
     let found: NodeInterface | null = await this.dijkstraSearch(nodes, startPoint);
     if (found !== null) await this.dijkstraBacktrack(nodes, found.x, found.y);
-    return { visitedNodes: this.visitedNodes2, routeNodes: this.routeNodes };
+    const endTime = performance.now() - startTime;
+    return { visitedNodes: this.visitedNodes2, routeNodes: this.routeNodes, time: endTime };
   }
 
   stopSolving() {
@@ -47,16 +53,23 @@ export default class Dijkstra {
         else if (adj.y === currentNode.y - 1) distanceBetweenNodes = adj.bottomRouteWeight;
         else distanceBetweenNodes = currentNode.bottomRouteWeight;
 
-        let adjCost = distanceBetweenNodes + this.heap.arr[0].dist;
+        let adjCost = distanceBetweenNodes + this.heap.arr[0].f_val;
         // Finding the index of the adjacents node in the Heap
 
         const adjHeapIndex = this.heap.findByCoords(adj.x, adj.y);
         if (adjHeapIndex === -1) {
           if (!adj.visited) {
-            this.heap.insert({ x: adj.x, y: adj.y, dist: adjCost, prev: { x: currentNode.x, y: currentNode.y } });
+            this.heap.insert({
+              x: adj.x,
+              y: adj.y,
+              f_val: adjCost,
+              g_val: 0,
+              h_val: 0,
+              prev: { x: currentNode.x, y: currentNode.y },
+            });
             nodes[adj.y][adj.x].depth = adjCost;
           }
-        } else if (adjCost < this.heap.arr[adjHeapIndex].dist) {
+        } else if (adjCost < this.heap.arr[adjHeapIndex].f_val) {
           this.heap.arr[adjHeapIndex].prev = { x: currentNode.x, y: currentNode.y };
           this.heap.decreaseKey(adjHeapIndex, adjCost);
           nodes[adj.y][adj.x].depth = adjCost;

@@ -9,6 +9,7 @@ import Infocontainer from "./Infocontainer.tsx";
 import CommonFuncs, { Point } from "../algorithms/common-func.ts";
 import Astar from "../algorithms/Astar.ts";
 import PFVisualizer from "../algorithms/visualizer.ts";
+import SolveTimeDisplay from "./SolveTimeDisplay.tsx";
 
 export interface NodeInterface {
   id: number;
@@ -41,17 +42,13 @@ export interface DragData {
 }
 
 interface PathFindingVisualizerState {
-  // nodes: NodeInterface[][];
-  // startNode?: { x: number; y: number };
-  // finishNode?: { x: number; y: number };
-  isSHeld: boolean;
-  isFHeld: boolean;
   solvespeed: number;
   currentAlgorithm: Algorithms;
   isDraggingWall: boolean;
   dragData: DragData | null;
   isVisualizingState: boolean;
   hasVisFound: boolean;
+  solveTime: number;
 }
 
 export enum PathPointType {
@@ -94,14 +91,13 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      isSHeld: false,
-      isFHeld: false,
       solvespeed: 1,
       currentAlgorithm: Algorithms.AS,
       isDraggingWall: false,
       dragData: null,
       isVisualizingState: false,
       hasVisFound: false,
+      solveTime: 0,
     };
   }
 
@@ -118,6 +114,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     this.resetSearch(ResetType.clearsolution, false);
     this.startSolving();
   };
+
   startSolving = async () => {
     if (this.startNode === undefined || this.finishNode === undefined) return;
     const alg = this.state.currentAlgorithm;
@@ -140,6 +137,8 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     if (this.search === null) return;
     let results = await this.search.startSearch(this.nodes, this.startNode, this.finishNode);
     if (results === null) return;
+    this.setSolveTime(results.time);
+    console.log(results.time);
     this.visualizer = new PFVisualizer();
     await this.visualizer.visualizeResults(results, this.customSetState, this.currentSpeed, true, clear);
   };
@@ -171,7 +170,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     }
   };
 
-  setPointType = (nodeInfo: Point, type: PathPointType, prevType: PathPointType) => {
+  setPointType = (nodeInfo: Point, type: PathPointType, _prevType: PathPointType) => {
     //if (this.isSolving) return;
 
     if (type === PathPointType.Start) {
@@ -250,6 +249,8 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   resetSearch = async (type: ResetType, resettimeout: boolean) => {
     this.stopSolving();
+    this.search.stopSolving();
+    this.visualizer.stopVisualize();
     this.needTimeout = resettimeout;
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = 0; j < this.nodes[i].length; j++) {
@@ -312,7 +313,25 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
       if (!this.state.hasVisFound && this.state.isVisualizingState) {
         this.clearAndRestartSolve();
       }
+      if (!this.state.isVisualizingState) {
+        this.search.stopSolving();
+        this.visualizer.stopVisualize();
+      }
     });
+  };
+
+  setSolveTime = (time: number) => {
+    this.setState({ solveTime: Math.round(time * 10) / 10 });
+  };
+
+  addCol = () => {
+    this.gridsize.x++;
+    this.createGrid();
+  };
+
+  addRow = () => {
+    this.gridsize.y++;
+    this.createGrid();
   };
 
   render() {
@@ -342,7 +361,9 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
             />
           </div>
           <div className="main-col-3">
+            <SolveTimeDisplay solvetimeProps={this.state.solveTime} />
             <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
+            <button onClick={this.addCol}>asdasdasd</button>
           </div>
         </div>
       </div>

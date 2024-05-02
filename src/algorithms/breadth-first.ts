@@ -1,4 +1,4 @@
-import { NodeInterface, PathPointType, SearchResults } from "../components/PathFindingVisualizer";
+import { NodeInterface, PathPointType } from "../components/PathFindingVisualizer";
 import CommonFuncs, { Point } from "./common-func";
 
 export default class BreadthFirstSearch {
@@ -12,7 +12,7 @@ export default class BreadthFirstSearch {
   nodes: NodeInterface[][] = [];
   isFinishFound = false;
 
-  async startSearch(input_nodes: NodeInterface[][], startPoint: Point): Promise<SearchResults | null> {
+  async startSearch(input_nodes: NodeInterface[][], startPoint: Point) {
     this.nodes = Array.from(input_nodes);
     this.queue = [];
     this.routeNodes = [];
@@ -20,9 +20,11 @@ export default class BreadthFirstSearch {
     this.isSolving = true;
     this.startPoint = JSON.parse(JSON.stringify(startPoint));
     this.isFinishFound = false;
+    const startTime = performance.now();
     let found = await this.breadthFirstSearch(this.nodes, startPoint);
     if (found !== null) await this.bfsBackTrack(found!, this.nodes);
-    return { visitedNodes: this.visitedNodes, routeNodes: this.routeNodes };
+    const endTime = performance.now() - startTime;
+    return { visitedNodes: this.visitedNodes, routeNodes: this.routeNodes, time: endTime };
   }
 
   stopSolving() {
