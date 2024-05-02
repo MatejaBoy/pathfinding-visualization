@@ -7,6 +7,7 @@ interface NavbarProps {
   stopSolving: () => void;
   resetSearch: (type: ResetType, resettimeout: boolean) => void;
   setIsVisualizing: (isVis: boolean) => void;
+  setRowNum: (inc:boolean) => void;
   isVisualizing: boolean;
 }
 
@@ -110,16 +111,7 @@ function Navbar(props: NavbarProps) {
                 Information
               </a>
             </li>
-            <li className="nav-item">
-              <button
-                role="button"
-                className={"nav-link active visbtn " + props.isVisualizing}
-                key={"resetButton"}
-                onClick={handleVisualizeBtn}
-              >
-                Let's visualize
-              </button>
-            </li>
+
             <li className="nav-item">
               <a
                 role="button"
@@ -131,6 +123,16 @@ function Navbar(props: NavbarProps) {
               >
                 Clear Grid
               </a>
+            </li>
+            <li className="nav-item">
+              <button
+                role="button"
+                className={"nav-link active visbtn " + props.isVisualizing}
+                key={"resetButton"}
+                onClick={handleVisualizeBtn}
+              >
+                Let's visualize
+              </button>
             </li>
             <li className="nav-item">
               <a
@@ -155,6 +157,25 @@ function Navbar(props: NavbarProps) {
               >
                 Reset grid
               </a>
+            </li>
+            {/* <li className="nav-item">
+              <a
+                role="button"
+                className="nav-link active"
+                key={"addRowButton"}
+                onClick={() => {
+                  props.addRow();
+                }}
+              >
+                Add row
+              </a>
+            </li> */}
+            <li className="nav-item">
+              <div style={{textAlign:"center"}} className="btn-group" role="group" aria-label="Basic mixed styles example">
+                <button type="button" className="btn" onClick={() => {props.setRowNum(false);}}>-</button>
+                <div className="btn" style={{color:"white"}}>Rows</div>
+                <button type="button" className="btn" onClick={() => {props.setRowNum(true);}}>+</button>
+              </div>
             </li>
           </ul>
         </div>

@@ -33,11 +33,11 @@ export default function Node(node: NodeProps) {
   const [isRouteNode, setIsRouteNode] = useState(node.isRouteNodeProp);
   const [rightRouteWidth, setRigthRouteWidth] = useState(node.rightRouteWeightProp);
   const [bottomRouteWidth, setBottomRouteWidth] = useState(node.bottomRouteWeightProp);
-  const [isRightRoutePath, setIsRightRoutePath] = useState(node.isRightRoutePathProp);
-  const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
+  // const [isRightRoutePath, setIsRightRoutePath] = useState(node.isRightRoutePathProp);
+  // const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
+  // const [depth, setDepth] = useState(node.depthProp);
   const [toAnimate, setToAnimate] = useState(node.toAnimateProp);
   const [isVisited, setIsVisited] = useState(node.isVisitedProp);
-  const [depth, setDepth] = useState(node.depthProp);
 
   useEffect(() => {
     setToAnimate(node.toAnimateProp);
@@ -67,17 +67,19 @@ export default function Node(node: NodeProps) {
     setBottomRouteWidth(node.bottomRouteWeightProp);
   }, [node.bottomRouteWeightProp]);
 
-  useEffect(() => {
-    setIsRightRoutePath(node.isRightRoutePathProp);
-  }, [node.isRightRoutePathProp]);
+  // useEffect(() => {
+  //   setIsRightRoutePath(node.isRightRoutePathProp);
+  // }, [node.isRightRoutePathProp]);
 
-  useEffect(() => {
-    setIsBottomRoutePath(node.isBottomRoutePathProp);
-  }, [node.isBottomRoutePathProp]);
+  // useEffect(() => {
+  //   setIsBottomRoutePath(node.isBottomRoutePathProp);
+  // }, [node.isBottomRoutePathProp]);
 
-  useEffect(() => {
-    setDepth(node.depthProp);
-  }, [node.depthProp]);
+  // useEffect(() => {
+  //   setDepth(node.depthProp);
+  // }, [node.depthProp]);
+
+  
   // Handling dragging the mouse over a Node
   // -- calling clickOnNode with drag=true --
   async function onMouseMouseOver(e: React.MouseEvent) {

@@ -199,9 +199,22 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
 
   componentDidMount(): void {
     this.createGrid();
+    window.addEventListener('resize', this.onWindowSizeChange);
+    return 
   }
 
+  componentWillUnmount(): void {
+      window.removeEventListener('resize', this.onWindowSizeChange);
+  }
+
+  onWindowSizeChange = () => {
+    this.createGrid();
+  };
+
   createGrid() {
+    let width = window.innerWidth;
+    console.log(width);
+    this.gridsize.x = Math.round(width / 80);
     let node_list = [];
     let node_rows = [];
     let current_id = 0;
@@ -325,12 +338,14 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   };
 
   addCol = () => {
-    this.gridsize.x++;
+    //this.gridsize.x++;
     this.createGrid();
   };
 
-  addRow = () => {
-    this.gridsize.y++;
+  setRowNum = (inc:boolean) => {
+
+    if (!inc && this.gridsize.y > 6) this.gridsize.y--;
+    else if (inc) this.gridsize.y++;
     this.createGrid();
   };
 
@@ -344,6 +359,7 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           stopSolving={this.stopSolving}
           isVisualizing={this.state.isVisualizingState}
           setIsVisualizing={this.setIsVisualizing}
+          setRowNum={this.setRowNum}
         />
         <div id="mainbody">
           <div className="main-col-1">
@@ -363,7 +379,6 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           <div className="main-col-3">
             <SolveTimeDisplay solvetimeProps={this.state.solveTime} />
             <SliderComponent onchange={this.setSpeed} defaultval={this.defaultSpeed} max={100} min={10} step={10} />
-            <button onClick={this.addCol}>asdasdasd</button>
           </div>
         </div>
       </div>
