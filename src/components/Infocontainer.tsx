@@ -14,7 +14,6 @@ export default function Infocontainer(props: InfocontainerProps) {
   }, [props.algorithm]);
 
   function handleCheckboxChange(event: React.ChangeEvent<HTMLInputElement>) {
-    console.log(event.currentTarget.checked);
     if (event.currentTarget.checked) props.setalg(Algorithms.IDDFS);
     else props.setalg(Algorithms.DFS);
   }
@@ -67,7 +66,7 @@ export default function Infocontainer(props: InfocontainerProps) {
         <ul style={{ marginBottom: "0", listStyleType: "auto", textAlign: "justify", paddingLeft: 15 }}>
           <li>Press the "Set start node" and "Set finish node" buttons to choose a random start and finish nodes</li>
           <li>Press on a node in the grid to set it to a wall</li>
-          <li style={{ display: alg != Algorithms.WD ? "none" : "" }}>
+          <li style={{ display: alg != Algorithms.WD && alg != Algorithms.AS ? "none" : "" }}>
             Press on a route between two nodes once or multiple times to increase its weight{" "}
           </li>
           <li>Press the "Start solving" button</li>

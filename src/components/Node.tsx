@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../App.tsx";
 import "./style.css";
-import { PathPointType } from "./PathFindingVisualizer.tsx";
+import { DragData, PathPointType } from "./PathFindingVisualizer.tsx";
 
 interface NodeProps {
   id: number;
@@ -11,45 +11,37 @@ interface NodeProps {
   isVisitedProp: boolean;
   depthProp: number;
   isTestOnProp: boolean;
+  isRouteNodeProp: boolean;
   weight: number;
-  clickOnNode: (nodeInfo: [number, number, number], drag: boolean) => void;
+  setNodeType: Function;
   clickOnRoute: (nodeInfo: [number, number, number], dir: string) => void;
+  setDragData: (data: DragData | null) => void;
   isLastRow: boolean;
   isLastCol: boolean;
   rightRouteWeightProp: number;
   bottomRouteWeightProp: number;
   isRightRoutePathProp: boolean;
   isBottomRoutePathProp: boolean;
+  toAnimateProp: boolean;
+  isDraggingWall: boolean;
+  dragData: DragData | null;
 }
 
 export default function Node(node: NodeProps) {
   const [nodeType, setNodeType] = useState(node.nodeTypeProp);
-  const [isVisited, setIsVisited] = useState(node.isVisitedProp);
-  const [depth, setDepth] = useState(node.depthProp);
   const [isTest, setIsTest] = useState(node.isTestOnProp);
+  const [isRouteNode, setIsRouteNode] = useState(node.isRouteNodeProp);
   const [rightRouteWidth, setRigthRouteWidth] = useState(node.rightRouteWeightProp);
   const [bottomRouteWidth, setBottomRouteWidth] = useState(node.bottomRouteWeightProp);
   const [isRightRoutePath, setIsRightRoutePath] = useState(node.isRightRoutePathProp);
   const [isBottomRoutePath, setIsBottomRoutePath] = useState(node.isBottomRoutePathProp);
+  const [toAnimate, setToAnimate] = useState(node.toAnimateProp);
+  const [isVisited, setIsVisited] = useState(node.isVisitedProp);
+  const [depth, setDepth] = useState(node.depthProp);
 
-  function handleClick() {
-    node.clickOnNode([node.id, node.x, node.y], false);
-  }
-
-  function handleClickOnRoute(dir: string) {
-    node.clickOnRoute([node.id, node.x, node.y], dir);
-  }
-
-  // Handling dragging the mouse over a Node
-  // -- calling clickOnNode with drag=true --
-  function onMouseMouseOver(e: React.MouseEvent) {
-    if (e.buttons) {
-      node.clickOnNode([node.id, node.x, node.y], true);
-    }
-  }
-
-  // When the prop nodeTypeProp changes,
-  // we set the state variable nodeType to the new nodeTypeProp value
+  useEffect(() => {
+    setToAnimate(node.toAnimateProp);
+  }, [node.toAnimateProp]);
 
   useEffect(() => {
     setNodeType(node.nodeTypeProp);
@@ -60,8 +52,8 @@ export default function Node(node: NodeProps) {
   }, [node.isVisitedProp]);
 
   useEffect(() => {
-    setDepth(node.depthProp);
-  }, [node.depthProp]);
+    setIsRouteNode(node.isRouteNodeProp);
+  }, [node.isRouteNodeProp]);
 
   useEffect(() => {
     setIsTest(node.isTestOnProp);
@@ -83,6 +75,56 @@ export default function Node(node: NodeProps) {
     setIsBottomRoutePath(node.isBottomRoutePathProp);
   }, [node.isBottomRoutePathProp]);
 
+  useEffect(() => {
+    setDepth(node.depthProp);
+  }, [node.depthProp]);
+  // Handling dragging the mouse over a Node
+  // -- calling clickOnNode with drag=true --
+  async function onMouseMouseOver(e: React.MouseEvent) {
+    if (node.dragData !== null && e.buttons) {
+      if (nodeType === PathPointType.Start || nodeType === PathPointType.Finish) return;
+
+      node.setNodeType({ x: node.x, y: node.y }, node.dragData!.nodetype);
+      node.setDragData({ nodetype: node.dragData.nodetype, prevNode: { x: node.x, y: node.y } });
+      return;
+    }
+    if (e.buttons && nodeType === PathPointType.Normal) {
+      // SETTING TO WALL BY DRAG
+      if (nodeType === PathPointType.Normal) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Wall);
+    }
+  }
+
+  function onMouseDown() {
+    if (nodeType === PathPointType.Start || nodeType === PathPointType.Finish) return;
+    if (nodeType === PathPointType.Normal) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Wall);
+    if (nodeType === PathPointType.Wall) node.setNodeType({ x: node.x, y: node.y }, PathPointType.Normal);
+  }
+
+  function handleClickOnRoute(dir: string) {
+    node.clickOnRoute([node.id, node.x, node.y], dir);
+  }
+
+  function onMouseLeave(event: React.MouseEvent<HTMLDivElement>) {
+    if (nodeType !== PathPointType.Start && nodeType != PathPointType.Finish) return;
+    if (event.buttons) node.setDragData({ nodetype: nodeType, prevNode: { x: node.x, y: node.y } });
+  }
+
+  function getVisualizerModifier() {
+    if (isTest && toAnimate) return "testcolor";
+    else if (isRouteNode && toAnimate) return "routenode";
+    else if (isVisited && toAnimate == true) return "visited";
+    else return "";
+  }
+
+  function getClassModifierRightRoute() {
+    // if (isRightRoutePath && toAnimate) return "_" + rightRouteWidth.toString() + " routepath";
+    return "_" + rightRouteWidth.toString();
+  }
+  function getClassModifierBottomRoute() {
+    // if (isRightRoutePath && toAnimate) return "_" + rightRouteWidth.toString() + " routepath";
+    return "_" + bottomRouteWidth.toString();
+  }
+
   function getClassModifier() {
     switch (nodeType) {
       case PathPointType.Normal:
@@ -93,53 +135,29 @@ export default function Node(node: NodeProps) {
         return "start";
       case PathPointType.Finish:
         return "finish";
-      case PathPointType.RouteNode:
-        return "routenode";
     }
   }
-
-  function getVisitedModifier() {
-    if (isVisited == true) return "visited";
-    if (isTest == true) return "testcolor";
-    else return "";
-  }
-
-  function getClassModifierRightRoute() {
-    if (!isRightRoutePath) {
-      return "_" + rightRouteWidth.toString();
-    } else {
-      return "_" + rightRouteWidth.toString() + " routepath";
-    }
-  }
-  function getClassModifierBottomRoute() {
-    if (!isBottomRoutePath) return "_" + bottomRouteWidth.toString();
-    else return "_" + bottomRouteWidth.toString() + " routepath";
-  }
-
-  let styleRight = {
-    display: node.isLastCol ? "none" : "block",
-  };
-  let styleBottom = {
-    display: node.isLastRow ? "none" : "block",
-  };
 
   let returnDiv = (
     <div className="tilewrapper">
       <div
-        className={"tile" + " " + getClassModifier() + " " + getVisitedModifier()}
+        className={"tile" + " " + getClassModifier() + " " + getVisualizerModifier()}
         key={node.id}
         onMouseOver={onMouseMouseOver}
-        onMouseDown={handleClick}
-      >
-        {depth}
-      </div>
+        onMouseDown={onMouseDown}
+        onMouseLeave={onMouseLeave}
+      ></div>
       <div
-        style={styleRight}
+        style={{
+          display: node.isLastCol ? "none" : "block",
+        }}
         onClick={() => handleClickOnRoute("right")}
         className={"route_right" + " " + getClassModifierRightRoute()}
       ></div>
       <div
-        style={styleBottom}
+        style={{
+          display: node.isLastRow ? "none" : "block",
+        }}
         onClick={() => handleClickOnRoute("bottom")}
         className={"route_bottom" + " " + getClassModifierBottomRoute()}
       ></div>

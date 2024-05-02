@@ -9,16 +9,12 @@ interface SliderProps {
 }
 
 export default function SliderComponent({ onchange, max, min, step, defaultval }: SliderProps) {
-  //const [value, setValue] = useState(defaultval);
-
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log("current val: " + event.target.value);
     onchange(event.target.value);
-    //setValue(Number(event.target.value));
   };
   return (
     <div className="slidercomponent">
-      <h6 className="slidertitle">Solving speed</h6>
+      <h6 className="slidertitle">Animation speed</h6>
       <div className="sliderwrapper">
         <input
           id="slider"

@@ -1,10 +1,22 @@
-import { Algorithms } from "./PathFindingVisualizer";
+import { useEffect, useState } from "react";
+import { Algorithms, ResetType } from "./PathFindingVisualizer";
 
 interface NavbarProps {
   setAlg: Function;
+  startSolving: () => void;
+  stopSolving: () => void;
+  resetSearch: (type: ResetType, resettimeout: boolean) => void;
+  setIsVisualizing: (isVis: boolean) => void;
+  isVisualizing: boolean;
 }
 
 function Navbar(props: NavbarProps) {
+  const [isVisualizing, setIsVisualizing] = useState(props.isVisualizing);
+
+  useEffect(() => {
+    setIsVisualizing(props.isVisualizing);
+  }, [props.isVisualizing]);
+
   function clickOnAlgorithm(event: React.MouseEvent<HTMLAnchorElement>) {
     let alg;
     switch (event.currentTarget.id) {
@@ -24,8 +36,16 @@ function Navbar(props: NavbarProps) {
     props.setAlg(alg);
   }
 
+  function handleVisualizeBtn() {
+    if (isVisualizing) {
+      props.setIsVisualizing(false);
+    } else {
+      props.setIsVisualizing(true);
+    }
+  }
+
   return (
-    <nav id="navbar" className="navbar fixed-top navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+    <nav id="navbar" className="navbar center fixed-top navbar-expand-sm bg-body-tertiary" data-bs-theme="dark">
       <div className="container-fluid">
         <a className="navbar-brand" href="#">
           Pathfinder
@@ -42,10 +62,10 @@ function Navbar(props: NavbarProps) {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+          <ul className="navbar-nav justify-content-center me-auto mb-2 mb-lg-0 ">
             <li className="nav-item dropdown">
               <a
-                className="nav-link dropdown-toggle"
+                className="nav-link active dropdown-toggle"
                 href="#"
                 role="button"
                 data-bs-toggle="dropdown"
@@ -72,7 +92,7 @@ function Navbar(props: NavbarProps) {
                 </li>
                 <li>
                   <a id="wdbutton" onClick={clickOnAlgorithm} className="dropdown-item" href="#">
-                    Weighted Dijkstra
+                    Dijkstra search
                   </a>
                 </li>
                 <li>
@@ -84,6 +104,57 @@ function Navbar(props: NavbarProps) {
                   </a>
                 </li>
               </ul>
+            </li>
+            <li className="nav-item">
+              <a role="button" className="nav-link active" key={"resetButton"}>
+                Information
+              </a>
+            </li>
+            <li className="nav-item">
+              <button
+                role="button"
+                className={"nav-link active visbtn " + props.isVisualizing}
+                key={"resetButton"}
+                onClick={handleVisualizeBtn}
+              >
+                Let's visualize
+              </button>
+            </li>
+            <li className="nav-item">
+              <a
+                role="button"
+                className="nav-link active"
+                key={"resetButton"}
+                onClick={() => {
+                  props.resetSearch(ResetType.cleargrid, true);
+                }}
+              >
+                Clear Grid
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                role="button"
+                className="nav-link active"
+                key={"resetButton"}
+                onClick={() => {
+                  props.resetSearch(ResetType.clearsolution, true);
+                }}
+              >
+                Clear solution
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                role="button"
+                className="nav-link active"
+                key={"resetButton"}
+                onClick={() => {
+                  props.resetSearch(ResetType.resetgrid, true);
+                }}
+              >
+                Reset grid
+              </a>
             </li>
           </ul>
         </div>
