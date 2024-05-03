@@ -1,9 +1,6 @@
 import { NodeInterface, PathPointType } from "../components/PathFindingVisualizer";
 import CommonFuncs, { Point } from "./common-func";
 
-let startTimePerf = 0;
-let stopTimePerf = 0;
-
 export default class DepthFirstSearch {
   // Function for creating a little delay for visualization purposes
 
@@ -78,7 +75,6 @@ export default class DepthFirstSearch {
     if (!this.isSolving) return false;
 
     if (checkNode.type === PathPointType.Start) {
-      stopTimePerf = performance.now();
       return true;
     }
 
@@ -111,10 +107,6 @@ export default class DepthFirstSearch {
 
     if (currentNode.type === PathPointType.Finish) {
       return currentNode;
-    }
-
-    if (currentNode.type === PathPointType.Start) {
-      startTimePerf = performance.now();
     }
 
     currentNode.visited = true;
