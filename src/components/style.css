@@ -303,7 +303,7 @@
     height: 20rem;
 
   }
-  .sliderwrapper::before, .sliderwrapper::after {
+.sliderwrapper::before, .sliderwrapper::after {
     display: block;
     position: absolute;
     z-index: 99;
@@ -315,10 +315,10 @@
     padding: 0.75rem 0;
     pointer-events: none;
   }
-  .sliderwrapper::before {
+.sliderwrapper::before {
     content: "+";
   }
-  .sliderwrapper::after {
+.sliderwrapper::after {
     content: "−";
     bottom: 0;
   }
@@ -339,45 +339,20 @@ input[type=range] {
     overflow: hidden;
     cursor: row-resize;
   }
-  input[type=range][step] {
+input[type=range][step] {
     background-color: #21252949;
 
   }
-  input[type=range]::-webkit-slider-thumb {
+input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 0;
     box-shadow: -20rem 0 0 20rem #212529;
   }
-  input[type=range]::-moz-range-thumb {
+input[type=range]::-moz-range-thumb {
     border: none;
     width: 0;
     box-shadow: -20rem 0 0 20rem #21252949;
   }
-
-.buttonrow{
-    display: flex;
-    height: 50px;
-    margin-bottom: 10px;
-    margin-top: 20px;
-    justify-content: center;
-}
-
-
-.menubuttons{
-    color: black;
-    border:none;
-    background-color: transparent;
-    border-radius: 5px;
-    margin: 0px 5px;
-    font-weight: 600;
-    border-color: black;
-    border-width: 0.1px;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.6);
-}
-
-.menubuttons:hover{
-    background-color: rgb(207, 202, 202);
-}
 
 
 #startsolvingbutton{
@@ -403,6 +378,7 @@ input[type=range] {
     margin-top: 100px;
     padding-top: 1px;
     align-content: center;
+    font-size: 0.9em;
 }
 
 .info-container{
@@ -441,6 +417,13 @@ body {
     font-family: 'Montserrat' !important;
     user-select: none;
     
+    --font-size-min: 14; 
+    --font-size-max: 18;
+    --font-view-min: 576;
+    --font-view-max: 1280;
+
+    font-size: clamp(calc(var(--font-size-min) * 1px), calc((var(--font-size-min) * 1px) + (var(--font-size-max) - var(--font-size-min)) * ((100vw - (var(--font-view-min) * 1px)) / var(--font-view-max))), calc(var(--font-size-max) * 1px) ) !important; 
+    line-height: 1.6em;
 }
 
 

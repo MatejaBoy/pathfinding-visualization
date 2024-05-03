@@ -31,7 +31,7 @@ export default class PFVisualizer {
 
     // Visualize visited nodes
     for (const node of results.visitedNodes) {
-      if (node.type === PathPointType.SpacerNode && clear !== undefined) clear();
+      if (node.type === PathPointType.SpacerNode && clear !== undefined) clear(true);
       needtimeout ? await CommonFuncs.timeout(this.solverTimeout!) : null;
       if (!this.shouldVis) return false;
       node.visited = true;

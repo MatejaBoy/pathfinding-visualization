@@ -130,8 +130,8 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     else if (alg === Algorithms.DFS) this.search = new DepthFirstSearch(false);
     else if (alg === Algorithms.IDDFS) {
       this.search = new DepthFirstSearch(true);
-      clear = () => {
-        this.resetSearch(ResetType.clearsolution, false);
+      clear = (stopV: boolean) => {
+        this.resetSearch(ResetType.clearsolution, false, stopV);
       };
     } else if (alg === Algorithms.WD) this.search = new Dijkstra();
     else if (alg === Algorithms.AS) this.search = new Astar();
@@ -237,8 +237,9 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   createGrid() {
     let width = window.innerWidth;
     if (!this.state.isInfoBoxVisible) width += 400;
-    console.log(width);
     this.gridsize.x = Math.round(width / 85);
+
+    this.defaultFinishNode.x = this.gridsize.x - 2;
     let node_list = [];
     let node_rows = [];
     let current_id = 0;
@@ -250,7 +251,6 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
           row === this.defaultStartNode.y
         ) {
           nodeType = PathPointType.Start;
-          //this.setState({ startNode: { x: col, y: row } });
           this.startNode = { x: col, y: row };
         } else if (
           col === this.defaultFinishNode.x &&
@@ -289,10 +289,17 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
     this.setState({});
   }
 
-  resetSearch = async (type: ResetType, resettimeout: boolean) => {
+  resetSearch = async (
+    type: ResetType,
+    resettimeout: boolean,
+    skipStop?: boolean
+  ) => {
     this.stopSolving();
-    this.search.stopSolving();
-    this.visualizer.stopVisualize();
+    if (skipStop) null;
+    else {
+      if (this.search !== null) this.search.stopSolving();
+      if (this.visualizer !== null) this.visualizer.stopVisualize();
+    }
     this.needTimeout = resettimeout;
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = 0; j < this.nodes[i].length; j++) {

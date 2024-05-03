@@ -1,5 +1,5 @@
 import { NodeInterface, PathPointType } from "../components/PathFindingVisualizer";
-import NodeMinHeap, { NodeMinHeapInterface } from "../data_struct/heap";
+import NodeMinHeap, { NodeMinHeapInterface } from "../miscs/heap";
 import CommonFuncs, { Point } from "./common-func";
 
 export default class Dijkstra {

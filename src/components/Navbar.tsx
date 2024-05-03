@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Algorithms, ResetType } from "./PathFindingVisualizer";
-import { usePub } from "../hooks/usePubSub";
 
 interface NavbarProps {
   setAlg: Function;
@@ -25,8 +24,6 @@ function Navbar(props: NavbarProps) {
   useEffect(() => {
     setInfoBoxVis(props.isInfoBoxVis);
   }, [props.isInfoBoxVis]);
-
-  const publish = usePub();
 
   function clickOnAlgorithm(event: React.MouseEvent<HTMLAnchorElement>) {
     let alg;
@@ -62,9 +59,6 @@ function Navbar(props: NavbarProps) {
       data-bs-theme="dark"
     >
       <div className="container-fluid">
-        <a className="navbar-brand" href="#">
-          Pathfinder
-        </a>
         <button
           className="navbar-toggler"
           type="button"
@@ -172,7 +166,7 @@ function Navbar(props: NavbarProps) {
                 key={"resetButton"}
                 onClick={handleVisualizeBtn}
               >
-                Let's visualize
+                {isVisualizing ? "Stop visualizing" : "Let's visualize"}
               </button>
             </li>
             <li className="nav-item">
