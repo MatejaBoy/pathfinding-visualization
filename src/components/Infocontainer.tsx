@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Algorithms } from "./PathFindingVisualizer";
-import { useSub } from "../hooks/usePubSub";
 import Texts from "../miscs/Text";
 
 interface InfocontainerProps {
@@ -10,18 +9,10 @@ interface InfocontainerProps {
 
 export default function Infocontainer(props: InfocontainerProps) {
   const [alg, setAlg] = useState(props.algorithm);
-  const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
     setAlg(props.algorithm);
   }, [props.algorithm]);
-
-  useSub("change_info_modal_state", subCallback);
-
-  function subCallback(data: boolean) {
-    console.log(data);
-    setIsHidden(data);
-  }
 
   function handleCheckboxChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (event.currentTarget.checked) props.setalg(Algorithms.IDDFS);
@@ -30,7 +21,7 @@ export default function Infocontainer(props: InfocontainerProps) {
 
   return (
     <>
-      <div hidden={isHidden} className="info-container">
+      <div className="info-container">
         <h6 style={{ fontWeight: "600", textAlign: "center" }}>
           {Texts.returnTitle(alg)}
         </h6>
