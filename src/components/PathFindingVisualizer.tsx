@@ -164,7 +164,6 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   };
 
   handleClickOnRoute = (nodeInfo: [number, number, number], dir: string) => {
-    // console.log("Click on route");
     if (this.isSolving) return;
     if (
       this.state.currentAlgorithm !== Algorithms.WD &&
@@ -213,8 +212,6 @@ class PathFindingVisualizer extends Component<{}, PathFindingVisualizerState> {
   };
 
   setDragData = (data: DragData | null) => {
-    //console.log("Set drag: ");
-    //console.log(data);
     this.setState({
       dragData: data,
     });

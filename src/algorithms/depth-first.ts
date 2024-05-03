@@ -79,7 +79,6 @@ export default class DepthFirstSearch {
 
     if (checkNode.type === PathPointType.Start) {
       stopTimePerf = performance.now();
-      console.log("Time it took to run the find the route with perf: " + (stopTimePerf - startTimePerf));
       return true;
     }
 
@@ -111,13 +110,11 @@ export default class DepthFirstSearch {
     this.searchCounter++;
 
     if (currentNode.type === PathPointType.Finish) {
-      console.log("Finish node found");
       return currentNode;
     }
 
     if (currentNode.type === PathPointType.Start) {
       startTimePerf = performance.now();
-      // console.log("depth_first_search_running");
     }
 
     currentNode.visited = true;

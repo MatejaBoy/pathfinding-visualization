@@ -11,9 +11,6 @@ export default class Dijkstra {
 
   isSolving: boolean = false;
 
-  constructor() {
-    console.log("new Dijkstra created");
-  }
 
   async startSearch(nodes: NodeInterface[][], startPoint: Point) {
     this.visitedNodes = [];
@@ -85,7 +82,6 @@ export default class Dijkstra {
       }
 
       if (this.heap.arr.length < 1) {
-        console.warn("Finish Node cannot be reached!");
         this.stopSolving();
         return null;
       }

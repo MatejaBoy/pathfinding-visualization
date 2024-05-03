@@ -73,7 +73,6 @@ export default class Astar {
             nodes[adj.y][adj.x].depth = g;
           }
         } else if (g < this.heap.arr[adjHeapIndex].g_val) {
-          console.log("this runs");
           this.heap.arr[adjHeapIndex].prev = { x: currentNode.x, y: currentNode.y };
           this.heap.arr[adjHeapIndex].g_val = g;
           this.heap.decreaseKey(adjHeapIndex, adjCost);

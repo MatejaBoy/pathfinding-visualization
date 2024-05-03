@@ -35,8 +35,6 @@ export default class BreadthFirstSearch {
     if (!this.isSolving) return false;
 
     if (checkNode.x === this.startPoint.x && checkNode.y === this.startPoint.y) {
-      // console.log("BFS has finished, starting visualization");
-      // console.log("Time it took to run the find the route with perf: " + (this.stopTimePerf - this.startTimePerf));
       this.stopTimePerf = performance.now();
       return true;
     }
@@ -80,7 +78,6 @@ export default class BreadthFirstSearch {
     this.queue.shift();
 
     if (this.queue[0] === undefined || this.queue === null) {
-      console.log("There's no route to the finish node :(");
       return null;
     }
 
